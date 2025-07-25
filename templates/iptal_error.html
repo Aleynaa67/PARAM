@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>İptal Başarısız</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #d9534f, #b22222);
+            color: #fff;
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 450px; width: 90%;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #fff;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        strong {
+            color: #ffb3b3;
+        }
+        a {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background-color: #b22222;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #7a1616;
+        }
+        @media(max-width: 500px) {
+            .container {
+                padding: 20px 25px;
+                font-size: 14px;
+            }
+            h2 {
+                font-size: 22px;
+            }
+            p {
+                font-size: 14px;
+            }
+            a {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>İptal işlemi başarısız oldu.</h2>
+        <p><strong>Sonuç:</strong> {{ sonuc }}</p>
+        <p><strong>Mesaj:</strong> {{ sonuc_str }}</p>
+        <p>Lütfen bilgileri kontrol edin ve tekrar deneyiniz.</p>
+        <a href="/">Menüye Dön</a>
+    </div>
+</body>
+</html>

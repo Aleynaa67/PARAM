@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>İşlem Başarısız</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fff0f0;
+      color: #b00020;
+      margin: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+      user-select: none;
+    }
+    .error-box {
+      border: 3px solid #b00020;
+      background: #ffcccc;
+      padding: 30px 50px;
+      border-radius: 12px;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(176, 0, 32, 0.3);
+    }
+    h2 {
+      margin-bottom: 25px;
+      font-size: 2.2em;
+      font-weight: 700;
+      color: #7a0015;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 2px #990000;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      font-size: 1.15em;
+      color: #8b0000;
+      margin-top: 15px;
+      text-align: left;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    ul li {
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .advice {
+      margin-top: 30px;
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #550000;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-box" role="alert" aria-live="assertive">
+    <h2>İşlem Başarısız!</h2>
+    <ul>
+      <li>Sonuç Kodu: {{ sonuc }}</li>
+      <li>Hata Mesajı: {{ sonuc_str }}</li>
+      <li>Sipariş ID: {{ siparis_id }}</li>
+      <li>Lütfen bilgilerinizi ve kart detaylarını kontrol edip tekrar deneyiniz.</li>
+    </ul>
+    <p class="advice">Gerekirse destek ile iletişime geçiniz.</p>
+  </div>
+</body>
+</html>

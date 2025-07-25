@@ -1,0 +1,129 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #4B0082, #8a2be2); /* Mor degrade */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.form-container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    max-width: 500px;
+    width: 100%;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #4B0082;
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #333;
+}
+
+input,
+select,
+button {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus {
+    border: 2px solid #8a2be2;
+    box-shadow: 0 0 8px 2px #a065f7;
+    outline: none;
+}
+
+/* Kart detayları yan yana (varsa) */
+.row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.row div {
+    flex: 1;
+    min-width: 100px;
+}
+
+/* GENEL buton - varsayılan mavi */
+button {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.iptal-iade-form button {
+    background-color: #007bff !important;  /* Mavi */
+    color: white !important;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+
+/* Radio butonları alt alta ve sağa hizalı */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.radio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.radio-row label {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Mobil uyum */
+@media (max-width: 500px) {
+    .form-container {
+        padding: 20px;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+
+    .radio-row {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}

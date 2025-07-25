@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>İşlem Menüsü - Param POS</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #4B0082;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .background-pattern {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .p-shape, .icon-card {
+      position: absolute;
+      font-size: 80px;
+      font-weight: bold;
+      opacity: 0.15;
+      user-select: none;
+      transform-origin: center;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .p-shape {
+      color: #00BFB3;
+    }
+
+    .icon-card {
+      color: #ffffff;
+    }
+
+    .param-logo {
+      font-size: 3rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 20px;
+      z-index: 1;
+      letter-spacing: 2px;
+    }
+
+    .menu-container {
+      background-color: #00BFB3;
+      border-radius: 12px;
+      padding: 40px;
+      width: 320px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      color: #ffffff;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-weight: 600;
+      font-size: 1.8rem;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 14px 0;
+      margin: 12px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      background-color: #191919;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #191919;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Arka plan desenleri -->
+  <div class="background-pattern" aria-hidden="true">
+    <div class="p-shape" style="top: 5%; left: 10%; transform: rotate(-20deg); font-size: 100px;">P</div>
+    <div class="p-shape" style="top: 15%; left: 40%; transform: rotate(15deg); font-size: 80px;">P</div>
+    <div class="p-shape" style="top: 25%; left: 70%; transform: rotate(-30deg); font-size: 90px;">P</div>
+    <div class="p-shape" style="top: 40%; left: 15%; transform: rotate(25deg); font-size: 120px;">P</div>
+    <div class="p-shape" style="top: 50%; left: 50%; transform: rotate(-45deg); font-size: 90px;">P</div>
+    <div class="p-shape" style="top: 60%; left: 75%; transform: rotate(10deg); font-size: 100px;">P</div>
+    <div class="p-shape" style="top: 70%; left: 30%; transform: rotate(-10deg); font-size: 110px;">P</div>
+    <div class="p-shape" style="top: 80%; left: 60%; transform: rotate(5deg); font-size: 85px;">P</div>
+    <div class="p-shape" style="top: 85%; left: 85%; transform: rotate(-15deg); font-size: 95px;">P</div>
+    <div class="p-shape" style="top: 35%; left: 80%; transform: rotate(20deg); font-size: 75px;">P</div>
+
+    <!-- Kredi kartı ikonları -->
+    <div class="icon-card" style="top: 10%; left: 85%; transform: rotate(10deg); font-size: 60px;">💳</div>
+    <div class="icon-card" style="top: 20%; left: 20%; transform: rotate(-15deg); font-size: 50px;">💳</div>
+    <div class="icon-card" style="top: 45%; left: 65%; transform: rotate(30deg); font-size: 65px;">💳</div>
+    <div class="icon-card" style="top: 75%; left: 10%; transform: rotate(-10deg); font-size: 55px;">💳</div>
+    <div class="icon-card" style="top: 90%; left: 40%; transform: rotate(5deg); font-size: 70px;">💳</div>
+  </div>
+
+  <!-- PARAM logosu (yazı olarak) -->
+  <div class="param-logo">PARAM</div>
+
+  <!-- Menü -->
+  <div class="menu-container">
+    <h1>İşlem Menüsü</h1>
+    <button id="new-payment" onclick="location.href='/pay'">Yeni Ödeme</button>
+    <button id="cancel-refund" onclick="location.href='/iptal-islem'">İşlem İptal / İade</button>
+  </div>
+
+</body>
+</html>

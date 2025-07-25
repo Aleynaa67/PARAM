@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+    <meta charset="UTF-8">
+    <title>İşlem İptali / İadesi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #4B0082;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #4B0082;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: #8a2be2;
+            box-shadow: 0 0 8px 2px #a065f7;
+            outline: none;
+        }
+
+        /* Radio group container */
+        .radio-group {
+            margin-top: 10px;
+        }
+
+        /* Her bir radio satırı */
+        .radio-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* Label yazısı */
+        .radio-row label {
+            flex: 1; /* Yazı sola hizalı */
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Radio buton sağda */
+        .radio-row input[type="radio"] {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #4B0082;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3a006a;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>İptal / İade Formu</h2>
+    <form class="iptal-iade-form" action="{{ url_for('iptal_islem') }}" method="POST">
+
+
+        <label for="siparis_id">Sipariş ID:</label>
+        <input type="text" id="siparis_id" name="siparis_id" required>
+
+        <label for="tutar">Tutar (₺):</label>
+        <input type="text" id="tutar" name="tutar" value="1.00" required>
+
+        <label>İşlem Tipi:</label>
+        <div class="radio-group">
+            <div class="radio-row">
+                <label for="iade">İade</label>
+                <input type="radio" id="iade" name="durum" value="IADE">
+            </div>
+            <div class="radio-row">
+                <label for="iptal">İptal</label>
+                <input type="radio" id="iptal" name="durum" value="IPTAL">
+            </div>
+        </div>
+
+        <button type="submit">Gönder</button>
+
+    </form>
+</div>
+</body>
+</html>

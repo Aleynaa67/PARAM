@@ -1,0 +1,20 @@
+<h2>Ödeme Başarılı!</h2>
+<p>{{ sonuc_str }}</p>
+
+<p>İşlem ID: {{ islem_id }}</p>
+<p>Sipariş ID: {{ siparis_id }}</p>
+
+<hr>
+
+<h3>UCD_HTML İçeriği:</h3>
+<pre>{{ ucd_html }}</pre>
+
+<hr>
+
+
+<form method="post" action="{{ url_for('dekont_sorgula') }}">
+    <input type="hidden" name="islem_id" value="{{ islem_id }}">
+    <label for="e_posta">Dekont Gönderilecek E-Posta:</label>
+    <input type="email" name="e_posta" id="e_posta" required>
+    <button type="submit">Dekont Gönder</button>
+</form>
