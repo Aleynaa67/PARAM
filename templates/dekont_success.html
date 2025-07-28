@@ -17,6 +17,7 @@
       align-items: center;
       position: relative;
       overflow: hidden;
+      flex-direction: column; /* Buton için */
     }
 
     /* Arka plan grid efekti */
@@ -97,36 +98,6 @@
       50% { opacity: 1; filter: drop-shadow(0 0 12px white); }
     }
 
-    @media (max-width: 500px) {
-      .container {
-        padding: 20px;
-      }
-    }
-
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="success-icon"></div>
-    <h2>Ödeme Başarılı!</h2>
-    <ul>
-      <li><span class="emoji"></span><strong>İşlem ID:</strong> {{ islem_id }}</li>
-      <li><span class="emoji">️</span><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
-      <li><span class="emoji"></span><strong>Ödeme Tutarı:</strong> {{ toplam_tutar }} TL</li>
-      <li><span class="emoji"></span><strong>Tarih:</strong> {{ tarih }}</li>
-      <li><span class="emoji"></span><strong>Durum:</strong> Başarılı</li>
-    </ul>
-  </div>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Test Buton</title>
-</head>
-<body>
-  <button id="back-home">Anasayfaya Dön</button>
-
-  <style>
     #back-home {
       margin-top: 30px;
       padding: 12px 24px;
@@ -138,24 +109,37 @@
       cursor: pointer;
       box-shadow: 0 0 10px #30D5C8;
       transition: background 0.3s ease;
+      position: relative;
+      z-index: 1;
     }
 
     #back-home:hover {
       background: #26b3a8;
       box-shadow: 0 0 15px #26b3a8;
     }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px;
+      }
+    }
   </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon"></div>
+    <h2>Ödeme Başarılı!</h2>
+    <ul>
+      <li><span class="emoji"></span><strong>İşlem ID:</strong> {{ islem_id }}</li>
+      <li><span class="emoji"></span><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
+      <li><span class="emoji"></span><strong>Ödeme Tutarı:</strong> {{ toplam_tutar }} TL</li>
+      <li><span class="emoji"></span><strong>Tarih:</strong> {{ tarih }}</li>
+      <li><span class="emoji"></span><strong>Durum:</strong> Başarılı</li>
+    </ul>
 
-  <script>
-    document.getElementById('back-home').onclick = function() {
-      window.location.href = '/';
-    };
-  </script>
-</body>
-
-
-</html>
-
+    <!-- Buton buraya eklendi -->
+    <button id="back-home">Anasayfaya Dön</button>
+  </div>
 
   <script>
     const starCount = 60; // yıldız sayısı
@@ -183,7 +167,11 @@
 
       body.appendChild(star);
     }
+
+    // Butonun çalışması
+    document.getElementById('back-home').onclick = function() {
+      window.location.href = '/';
+    };
   </script>
 </body>
-
-
+</html>
