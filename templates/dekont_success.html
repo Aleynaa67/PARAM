@@ -1,20 +1,189 @@
-<h2>Ödeme Başarılı!</h2>
-<p>{{ sonuc_str }}</p>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ödeme Başarılı!</title>
 
-<p>İşlem ID: {{ islem_id }}</p>
-<p>Sipariş ID: {{ siparis_id }}</p>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(#4B0082,#4B0082 );
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
 
-<hr>
+    /* Arka plan grid efekti */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle, white 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: moveBackground 20s linear infinite;
+      opacity: 0.2;
+      z-index: 0;
+    }
 
-<h3>UCD_HTML İçeriği:</h3>
-<pre>{{ ucd_html }}</pre>
+    @keyframes moveBackground {
+      from { background-position: 0 0; }
+      to { background-position: 100px 100px; }
+    }
 
-<hr>
+    .container {
+      background: #e8d8ff;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      width: 80%;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .success-icon {
+      font-size: 60px;
+      color: #008000;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #4B0082; /* ödeme başarılı yazısı */
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      font-size: 1.1rem;
+      color: #333;
+      line-height: 1.8;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    li strong {
+      color:black;
+    }
+
+    .emoji {
+      margin-right: 8px;
+    }
+
+    /* Yıldız stilleri */
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 6px white);
+      animation: twinkle 3s infinite ease-in-out;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 4px white); }
+      50% { opacity: 1; filter: drop-shadow(0 0 12px white); }
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon"></div>
+    <h2>Ödeme Başarılı!</h2>
+    <ul>
+      <li><span class="emoji"></span><strong>İşlem ID:</strong> {{ islem_id }}</li>
+      <li><span class="emoji">️</span><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
+      <li><span class="emoji"></span><strong>Ödeme Tutarı:</strong> {{ toplam_tutar }} TL</li>
+      <li><span class="emoji"></span><strong>Tarih:</strong> {{ tarih }}</li>
+      <li><span class="emoji"></span><strong>Durum:</strong> Başarılı</li>
+    </ul>
+  </div>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Buton</title>
+</head>
+<body>
+  <button id="back-home">Anasayfaya Dön</button>
+
+  <style>
+    #back-home {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: #30D5C8;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #30D5C8;
+      transition: background 0.3s ease;
+    }
+
+    #back-home:hover {
+      background: #26b3a8;
+      box-shadow: 0 0 15px #26b3a8;
+    }
+  </style>
+
+  <script>
+    document.getElementById('back-home').onclick = function() {
+      window.location.href = '/';
+    };
+  </script>
+</body>
 
 
-<form method="post" action="{{ url_for('dekont_sorgula') }}">
-    <input type="hidden" name="islem_id" value="{{ islem_id }}">
-    <label for="e_posta">Dekont Gönderilecek E-Posta:</label>
-    <input type="email" name="e_posta" id="e_posta" required>
-    <button type="submit">Dekont Gönder</button>
-</form>
+</html>
+
+
+  <script>
+    const starCount = 60; // yıldız sayısı
+    const body = document.body;
+
+    for(let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+
+      // Rastgele boyut (1px ile 4px arası)
+      const size = Math.random() * 3 + 1;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+
+      // Rastgele pozisyon (px cinsinden, kenarlardan 5px içerde)
+      const padding = 5;
+      star.style.top = (Math.random() * (window.innerHeight - padding * 2) + padding) + 'px';
+      star.style.left = (Math.random() * (window.innerWidth - padding * 2) + padding) + 'px';
+
+      // Rastgele animasyon süresi (2-5s arası)
+      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+
+      // Rastgele animasyon gecikmesi
+      star.style.animationDelay = (Math.random() * 5) + 's';
+
+      body.appendChild(star);
+    }
+  </script>
+</body>
+
+

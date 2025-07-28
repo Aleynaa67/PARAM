@@ -3,6 +3,8 @@ import requests
 import hashlib
 import base64
 import xml.etree.ElementTree as ET
+from datetime import datetime
+
 
 
 app = Flask(__name__)
@@ -265,7 +267,6 @@ def dekont_sorgula():
     except Exception as e:
         return f"<h3>XML Parse Hatası:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
-from flask import Flask, request
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import smtplib
@@ -283,7 +284,7 @@ def create_pdf(pdf_path, text):
 
 def send_email_with_pdf(to_email, pdf_path):
     from_email = "aleynaakilic61@gmail.com"       # Buraya kendi e-posta adresini yaz
-    password = "Aleynasecurity23"           # Buraya e-posta şifreni veya uygulama şifreni yaz
+    password = ""           # Buraya e-posta şifreni veya uygulama şifreni yaz
 
     msg = MIMEMultipart()
     msg['From'] = from_email
@@ -304,35 +305,21 @@ def send_email_with_pdf(to_email, pdf_path):
     server.send_message(msg)
     server.quit()
 
-@app.route('/dekont-gonder', methods=['GET', 'POST'])
-def dekont_gonder():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        if email:
-            # Mail gönderme işlemi
-            msg = EmailMessage()
-            msg['Subject'] = 'Ödeme Dekontunuz'
-            msg['From'] = 'aleynaakilic61@gmail.com'
-            msg['To'] = email
-            msg.set_content('Ödeme dekontunuz ektedir.')
 
-            # Örnek olarak bir PDF ekleyelim (dosya yolunu kendin değiştir)
-            with open('dekont.pdf', 'rb') as f:
-                file_data = f.read()
-                file_name = 'dekont.pdf'
-            msg.add_attachment(file_data, maintype='application', subtype='pdf', filename=file_name)
+@app.route('/dekont-success', methods=['POST'])
+def dekont_success():
+    islem_id = request.form.get('islem_id')
+    siparis_id = request.form.get('siparis_id')
+    toplam_tutar = request.form.get('toplam_tutar')
+    tarih = datetime.now().strftime("%d.%m.%Y")
 
-            # SMTP ayarları (örnek Gmail)
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login('aleynaakilic61@gmail.com', 'Aleynasecurity23')
-                smtp.send_message(msg)
+    print(f"islem_id: {islem_id}, siparis_id: {siparis_id}, toplam_tutar: {toplam_tutar}")
 
-            return render_template('dekont_gonderildi.html', email=email)
-
-        else:
-            return "Lütfen geçerli bir e-posta giriniz."
-
-    return render_template('dekont_form.html')
+    return render_template("dekont_success.html",
+                           islem_id=islem_id,
+                           siparis_id=siparis_id,
+                           toplam_tutar=toplam_tutar,
+                           tarih=tarih)
 
 if __name__ == "__main__":
     app.run(debug=True)

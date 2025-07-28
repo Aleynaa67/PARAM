@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #e6f4ea;
+      background: #4B0082;
       color: #2e7d32;
       margin: 0;
       padding: 0;
@@ -26,7 +26,7 @@
       text-align: center;
     }
     h2 {
-      color: #2e7d32;
+      color: #008000;
       margin-bottom: 20px;
       font-size: 1.8rem;
     }
@@ -48,20 +48,29 @@
     .success-icon {
       margin-bottom: 20px;
       display: inline-block;
-      filter: drop-shadow(0 0 3px #2e7d32);
+      filter: drop-shadow(0 0 3px #008000);
     }
     svg {
       width: 64px;
       height: 64px;
-      fill: #34c759; /* Daha canlı yeşil */
-      stroke: #2e7d32;
+      fill: #30D5C8;
+      stroke: #28a745;
       stroke-width: 2;
       transition: transform 0.3s ease;
     }
     .success-icon:hover svg {
       transform: scale(1.1);
-      fill: #28a745; /* Hover'da biraz koyulaşan yeşil */
+      fill: ;
       filter: drop-shadow(0 0 6px #28a745);
+    }
+    .button {
+      background-color: #008000;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -81,15 +90,15 @@
       <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
       <li><strong>UCD HTML:</strong> {{ ucd_html }}</li>
     </ul>
-    <form action="{{ url_for('dekont_sorgula') }}" method="POST">
-  <input type="hidden" name="islem_id" value="{{ islem_id }}">
-      <button style="background-color: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-  Dekont Göster
-</button>
 
-</form>
-
+    <!-- ✅ SADECE BU FORM KALSIN -->
+    <form action="{{ url_for('dekont_success') }}" method="POST">
+      <input type="hidden" name="islem_id" value="{{ islem_id }}">
+      <input type="hidden" name="siparis_id" value="{{ siparis_id }}">
+      <input type="hidden" name="toplam_tutar" value="{{ toplam_tutar }}">
+      <button type="submit" class="button">Dekont Göster</button>
     </form>
+
   </div>
 </body>
 </html>

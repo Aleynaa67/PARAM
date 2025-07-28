@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ödeme Başarılı</title>
+<style>
+  /* Body ve arka plan */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+
+    background: linear-gradient(135deg, #4B0082, #8a2be2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Arka plan animasyonu */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, white 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: moveBackground 20s linear infinite;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes moveBackground {
+    from { background-position: 0 0; }
+    to { background-position: 100px 100px; }
+  }
+
+  /* Ana container */
+  .form-container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    max-width: 500px;
+    width: 100%;
+
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Başlıklar */
+  h1, h2 {
+    text-align: center;
+    color: #4B0082;
+    margin-bottom: 25px;
+  }
+
+  /* Liste stilleri */
+  ul {
+    list-style: none;
+    padding: 0;
+    line-height: 1.6;
+    color: #333;
+  }
+
+  ul li strong {
+    color: #4B0082;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Ödeme Başarılı!</h2>
+  <p style="text-align:center; color:#555;">Aşağıda işlem bilgilerinizi bulabilirsiniz:</p>
+
+  <ul>
+    <li><strong>İşlem ID:</strong> {{ islem_id }}</li>
+    <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
+    <li><strong>Ödeme Tutarı:</strong> {{ toplam_tutar }} TL</li>
+    <li><strong>Tarih:</strong> {{ tarih }}</li>
+    <li><strong>Durum:</strong> Başarılı</li>
+  </ul>
+</div>
+
+</body>
+</html>

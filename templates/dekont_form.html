@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dekont Gönder</title>
+</head>
+<body>
+  <h2>Dekont Gönder</h2>
+  <form method="post" action="{{ url_for('dekont_success') }}">
+    <label for="islem_id">İşlem ID:</label>
+    <input type="text" id="islem_id" name="islem_id" required>
+
+    <label for="siparis_id">Sipariş ID:</label>
+    <input type="text" id="siparis_id" name="siparis_id" required>
+
+    <label for="toplam_tutar">Ödeme Tutarı:</label>
+    <input type="text" id="toplam_tutar" name="toplam_tutar" required>
+
+    <br><br>
+    <button type="submit">Gönder</button>
+  </form>
+</body>
+</html>
