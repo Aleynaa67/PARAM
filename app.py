@@ -4,6 +4,7 @@ import hashlib
 import base64
 import xml.etree.ElementTree as ET
 
+
 app = Flask(__name__)
 
 # Sabit Parametreler
@@ -217,8 +218,6 @@ def dekont_sorgula():
     islem_id = request.form.get("islem_id", "").strip()
     e_posta = request.form.get("e_posta", "").strip()
 
-    if not islem_id:
-        return "<h3>Lütfen İşlem ID giriniz.</h3>"
 
     xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -266,6 +265,74 @@ def dekont_sorgula():
     except Exception as e:
         return f"<h3>XML Parse Hatası:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
+from flask import Flask, request
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from email.mime.text import MIMEText
+from email.message import EmailMessage
+
+
+def create_pdf(pdf_path, text):
+    c = canvas.Canvas(pdf_path, pagesize=letter)
+    width, height = letter
+    c.drawString(100, height - 100, text)
+    c.save()
+
+def send_email_with_pdf(to_email, pdf_path):
+    from_email = "aleynaakilic61@gmail.com"       # Buraya kendi e-posta adresini yaz
+    password = "Aleynasecurity23"           # Buraya e-posta şifreni veya uygulama şifreni yaz
+
+    msg = MIMEMultipart()
+    msg['From'] = from_email
+    msg['To'] = to_email
+    msg['Subject'] = "Ödeme Dekontunuz"
+
+    body = MIMEText("Merhaba,\nÖdemenize ait dekont ektedir.", 'plain')
+    msg.attach(body)
+
+    with open(pdf_path, "rb") as f:
+        pdf = MIMEApplication(f.read(), _subtype="pdf")
+        pdf.add_header('Content-Disposition', 'attachment', filename="dekont.pdf")
+        msg.attach(pdf)
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail SMTP sunucusu
+    server.starttls()
+    server.login(from_email, password)
+    server.send_message(msg)
+    server.quit()
+
+@app.route('/dekont-gonder', methods=['GET', 'POST'])
+def dekont_gonder():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        if email:
+            # Mail gönderme işlemi
+            msg = EmailMessage()
+            msg['Subject'] = 'Ödeme Dekontunuz'
+            msg['From'] = 'aleynaakilic61@gmail.com'
+            msg['To'] = email
+            msg.set_content('Ödeme dekontunuz ektedir.')
+
+            # Örnek olarak bir PDF ekleyelim (dosya yolunu kendin değiştir)
+            with open('dekont.pdf', 'rb') as f:
+                file_data = f.read()
+                file_name = 'dekont.pdf'
+            msg.add_attachment(file_data, maintype='application', subtype='pdf', filename=file_name)
+
+            # SMTP ayarları (örnek Gmail)
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login('aleynaakilic61@gmail.com', 'Aleynasecurity23')
+                smtp.send_message(msg)
+
+            return render_template('dekont_gonderildi.html', email=email)
+
+        else:
+            return "Lütfen geçerli bir e-posta giriniz."
+
+    return render_template('dekont_form.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
