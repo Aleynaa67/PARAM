@@ -89,6 +89,7 @@
       <li><strong>Bank Auth Kodu:</strong> {{ bank_auth_code }}</li>
       <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
       <li><strong>UCD HTML:</strong> {{ ucd_html }}</li>
+      <li><strong>İşlem Tutarı:</strong> {{ islem_tutar }}</li>
     </ul>
 
     <!-- ✅ SADECE BU FORM KALSIN -->
@@ -96,6 +97,8 @@
       <input type="hidden" name="islem_id" value="{{ islem_id }}">
       <input type="hidden" name="siparis_id" value="{{ siparis_id }}">
       <input type="hidden" name="toplam_tutar" value="{{ toplam_tutar }}">
+      <input type="hidden" name="islem_tutar" value="{{ islem_tutar }}">
+
       <button type="submit" class="button">Dekont Göster</button>
     </form>
 

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ödeme Başarılı!</title>
+  <title>Ödeme başarılı!</title>
 
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(#4B0082,#4B0082 );
+      background: linear-gradient(#4B0082, #4B0082);
       margin: 0;
       padding: 0;
       min-height: 100vh;
@@ -17,10 +17,9 @@
       align-items: center;
       position: relative;
       overflow: hidden;
-      flex-direction: column; /* Buton için */
+      flex-direction: column;
     }
 
-    /* Arka plan grid efekti */
     body::before {
       content: "";
       position: absolute;
@@ -56,7 +55,7 @@
     }
 
     h2 {
-      color: #4B0082; /* ödeme başarılı yazısı */
+      color: #4B0082;
       margin-bottom: 20px;
     }
 
@@ -74,14 +73,13 @@
     }
 
     li strong {
-      color:black;
+      color: black;
     }
 
     .emoji {
       margin-right: 8px;
     }
 
-    /* Yıldız stilleri */
     .star {
       position: absolute;
       background: white;
@@ -118,60 +116,81 @@
       box-shadow: 0 0 15px #26b3a8;
     }
 
+    #param-hashtag {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      user-select: none;
+      z-index: 9999;
+      text-shadow: 0 0 8px rgba(0,0,0,0.7);
+      cursor: default;
+    }
+
     @media (max-width: 500px) {
       .container {
         padding: 20px;
+      }
+
+      #param-hashtag {
+        font-size: 2rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="success-icon"></div>
+    <div class="success-icon">✅</div>
     <h2>Ödeme Başarılı!</h2>
     <ul>
-      <li><span class="emoji"></span><strong>İşlem ID:</strong> {{ islem_id }}</li>
-      <li><span class="emoji"></span><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
-      <li><span class="emoji"></span><strong>Ödeme Tutarı:</strong> {{ toplam_tutar }} TL</li>
-      <li><span class="emoji"></span><strong>Tarih:</strong> {{ tarih }}</li>
-      <li><span class="emoji"></span><strong>Durum:</strong> Başarılı</li>
+      <li><strong>İşlem ID:</strong> {{ islem_id }}</li>
+      <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
+      <li><strong>Ödeme Tutarı:</strong> {{ islem_tutar }} TL</li>
+      <li><strong>Tarih:</strong> {{ tarih }}</li>
+      <li><strong>Durum:</strong> Başarılı</li>
     </ul>
 
-    <!-- Buton buraya eklendi -->
     <button id="back-home">Anasayfaya Dön</button>
   </div>
 
   <script>
-    const starCount = 60; // yıldız sayısı
+    const starCount = 60;
     const body = document.body;
 
-    for(let i = 0; i < starCount; i++) {
+    for (let i = 0; i < starCount; i++) {
       const star = document.createElement('div');
       star.classList.add('star');
 
-      // Rastgele boyut (1px ile 4px arası)
       const size = Math.random() * 3 + 1;
       star.style.width = size + 'px';
       star.style.height = size + 'px';
 
-      // Rastgele pozisyon (px cinsinden, kenarlardan 5px içerde)
       const padding = 5;
       star.style.top = (Math.random() * (window.innerHeight - padding * 2) + padding) + 'px';
       star.style.left = (Math.random() * (window.innerWidth - padding * 2) + padding) + 'px';
 
-      // Rastgele animasyon süresi (2-5s arası)
       star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-
-      // Rastgele animasyon gecikmesi
       star.style.animationDelay = (Math.random() * 5) + 's';
 
       body.appendChild(star);
     }
 
-    // Butonun çalışması
-    document.getElementById('back-home').onclick = function() {
+    document.getElementById('back-home').onclick = function () {
       window.location.href = '/';
     };
   </script>
+  <form action="/dekont-indir" method="POST">
+  <input type="hidden" name="islem_id" value="{{ islem_id }}">
+  <input type="hidden" name="bank_trans_id" value="{{ bank_trans_id }}">
+  <input type="hidden" name="bank_auth_code" value="{{ bank_auth_code }}">
+  <input type="hidden" name="siparis_id" value="{{ siparis_id }}">
+  <input type="hidden" name="toplam_tutar" value="{{ islem_tutar }}">
+
+</form>
+
+
+  <div id="param-hashtag">#ParamİleGüvende</div>
 </body>
 </html>

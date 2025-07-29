@@ -121,7 +121,11 @@ def pay():
     kk_sk_yil = request.form.get("kk_sk_yil")
     kk_cvc = request.form.get("kk_cvc")
     taksit = request.form.get("taksit", "1")
-    islem_tutar = request.form.get("islem_tutar")
+
+    # BURASI: islem_tutar değerini alırken print yapıyoruz
+    islem_tutar = request.form.get("islem_tutar") or request.form.get("toplam_tutar")
+    print("GELEN islem_tutar:", request.form.get("islem_tutar"))
+
     toplam_tutar = request.form.get("toplam_tutar")
     siparis_id = request.form.get("siparis_id")
 
@@ -148,6 +152,8 @@ def pay():
                 bank_trans_id=result.find("ns:Bank_Trans_ID", ns).text,
                 bank_auth_code=result.find("ns:Bank_AuthCode", ns).text,
                 siparis_id=result.find("ns:Siparis_ID", ns).text,
+                toplam_tutar=toplam_tutar,
+                islem_tutar=islem_tutar,
                 ucd_html=result.find("ns:UCD_HTML", ns).text
             )
         else:
@@ -159,6 +165,7 @@ def pay():
 
     except Exception as e:
         return render_template("error.html", sonuc="XML_PARSE_ERROR", sonuc_str=str(e))
+
 
 @app.route("/iptal-islem", methods=["GET", "POST"])
 def iptal_islem():
@@ -276,11 +283,38 @@ from email.mime.text import MIMEText
 from email.message import EmailMessage
 
 
-def create_pdf(pdf_path, text):
-    c = canvas.Canvas(pdf_path, pagesize=letter)
+from flask import send_file
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+@app.route('/dekont-indir', methods=['POST'])
+def dekont_indir():
+    islem_id = request.form.get('islem_id')
+    siparis_id = request.form.get('siparis_id')
+    islem_tutar = request.form.get('islem_tutar')
+    tarih = datetime.now().strftime("%d.%m.%Y")
+
+    # PDF içeriği
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
-    c.drawString(100, height - 100, text)
+
+    c.setFont("Helvetica", 12)
+    c.drawString(100, height - 100, "Ödeme Dekontu")
+    c.drawString(100, height - 130, f"İşlem ID     : {islem_id}")
+    c.drawString(100, height - 150, f"Sipariş ID   : {siparis_id}")
+    c.drawString(100, height - 170, f"Tutar        : {islem_tutar} TL")
+    c.drawString(100, height - 190, f"Tarih        : {tarih}")
+    c.drawString(100, height - 210, "Durum        : Başarılı")
+
     c.save()
+    buffer.seek(0)
+
+    return send_file(buffer,
+                     as_attachment=True,
+                     download_name=f"dekont_{islem_id}.pdf",
+                     mimetype='application/pdf')
 
 def send_email_with_pdf(to_email, pdf_path):
     from_email = "aleynaakilic61@gmail.com"       # Buraya kendi e-posta adresini yaz
@@ -310,15 +344,15 @@ def send_email_with_pdf(to_email, pdf_path):
 def dekont_success():
     islem_id = request.form.get('islem_id')
     siparis_id = request.form.get('siparis_id')
-    toplam_tutar = request.form.get('toplam_tutar')
+    islem_tutar = request.form.get('islem_tutar')
     tarih = datetime.now().strftime("%d.%m.%Y")
 
-    print(f"islem_id: {islem_id}, siparis_id: {siparis_id}, toplam_tutar: {toplam_tutar}")
+    print(f"islem_id: {islem_id}, siparis_id: {siparis_id}, islem_tutar: {islem_tutar}")
 
     return render_template("dekont_success.html",
                            islem_id=islem_id,
                            siparis_id=siparis_id,
-                           toplam_tutar=toplam_tutar,
+                           islem_tutar=islem_tutar,
                            tarih=tarih)
 
 if __name__ == "__main__":
