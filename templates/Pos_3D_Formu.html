@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Secure Ödeme</title>
+</head>
+<body>
+    <h2>3D Secure Ödeme Formu</h2>
+    <form method="POST" action="/odeme-3d">
+        <label>Kart Sahibi Adı:</label><br>
+        <input type="text" name="kk_sahibi"><br>
+
+        <label>Kart Numarası:</label><br>
+        <input type="text" name="kk_no"><br>
+
+        <label>Son Kullanma Ay:</label><br>
+        <input type="text" name="kk_sk_ay"><br>
+
+        <label>Son Kullanma Yıl:</label><br>
+        <input type="text" name="kk_sk_yil"><br>
+
+        <label>CVC:</label><br>
+        <input type="text" name="kk_cvc"><br>
+
+        <label>Taksit:</label><br>
+        <input type="text" name="taksit" value="1"><br>
+
+        <label>İşlem Tutarı:</label><br>
+        <input type="text" name="islem_tutar"><br>
+
+        <label>Toplam Tutar:</label><br>
+        <input type="text" name="toplam_tutar"><br>
+
+        <label>Sipariş ID:</label><br>
+        <input type="text" name="siparis_id"><br><br>
+
+        <input type="submit" value="Ödemeyi Başlat">
+    </form>
+</body>
+</html>

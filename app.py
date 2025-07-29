@@ -355,5 +355,104 @@ def dekont_success():
                            islem_tutar=islem_tutar,
                            tarih=tarih)
 
+@app.route("/odeme-3d", methods=["GET", "POST"])
+def odeme_3d():
+    if request.method == "GET":
+        return render_template("Pos_3D_Formu.html")  # 3D formun HTML'i
+
+    kk_sahibi = request.form.get("kk_sahibi")
+    kk_no = request.form.get("kk_no")
+    kk_sk_ay = request.form.get("kk_sk_ay")
+    kk_sk_yil = request.form.get("kk_sk_yil")
+    kk_cvc = request.form.get("kk_cvc")
+    taksit = request.form.get("taksit", "1")
+    islem_tutar = request.form.get("islem_tutar")
+    toplam_tutar = request.form.get("toplam_tutar")
+    siparis_id = request.form.get("siparis_id")
+
+    islem_hash = calculate_islem_hash(CLIENT_CODE, GUID, taksit, islem_tutar, toplam_tutar, siparis_id)
+
+    xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <TP_WMD_UCD_MD xmlns="https://turkpos.com.tr/">
+      <G>
+        <CLIENT_CODE>{CLIENT_CODE}</CLIENT_CODE>
+        <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
+        <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
+      </G>
+      <GUID>{GUID}</GUID>
+      <KK_Sahibi>{kk_sahibi}</KK_Sahibi>
+      <KK_No>{kk_no}</KK_No>
+      <KK_SK_Ay>{kk_sk_ay}</KK_SK_Ay>
+      <KK_SK_Yil>{kk_sk_yil}</KK_SK_Yil>
+      <KK_CVC>{kk_cvc}</KK_CVC>
+      <KK_Sahibi_GSM>5551231212</KK_Sahibi_GSM>
+      <Hata_URL>http://localhost:5000/3d-sonuc</Hata_URL>
+      <Basarili_URL>http://localhost:5000/3d-sonuc</Basarili_URL>
+      <Siparis_ID>{siparis_id}</Siparis_ID>
+      <Siparis_Aciklama>3D Test</Siparis_Aciklama>
+      <Taksit>{taksit}</Taksit>
+      <Islem_Tutar>{islem_tutar}</Islem_Tutar>
+      <Toplam_Tutar>{toplam_tutar}</Toplam_Tutar>
+      <Islem_Hash>{islem_hash}</Islem_Hash>
+      <Islem_Guvenlik_Tip>3D</Islem_Guvenlik_Tip>
+      <IPAdr>127.0.0.1</IPAdr>
+      <Ref_URL>http://localhost:5000</Ref_URL>
+      <Data1>a</Data1><Data2>a</Data2><Data3>a</Data3><Data4>a</Data4><Data5>a</Data5>
+    </TP_WMD_UCD_MD>
+  </soap:Body>
+</soap:Envelope>"""
+
+    headers = {
+        "Content-Type": "text/xml; charset=utf-8",
+        "SOAPAction": "https://turkpos.com.tr/TP_WMD_UCD_MD"
+    }
+
+    url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+    response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)
+
+    try:
+        root = ET.fromstring(response.text)
+        ns = {
+            'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+            'ns': 'https://turkpos.com.tr/'
+        }
+
+        result = root.find(".//ns:TP_WMD_UCD_MDResult", ns)
+        sonuc = result.find("ns:Sonuc", ns).text
+        sonuc_str = result.find("ns:Sonuc_Str", ns).text
+        ucd_html = result.find("ns:UCD_HTML", ns).text
+
+        if sonuc == "1":
+            return ucd_html  # 3D doğrulama sayfasını döndür
+        else:
+            return render_template("error.html", sonuc=sonuc, sonuc_str=sonuc_str)
+
+    except Exception as e:
+        return f"<h3>XML Parse Hatası</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
+
+
+@app.route("/3d-sonuc", methods=["POST"])
+def sonuc_3d():
+    islem_id = request.form.get("Islem_ID")
+    siparis_id = request.form.get("Siparis_ID")
+    sonuc = request.form.get("Sonuc")
+    sonuc_str = request.form.get("Sonuc_Str")
+    auth_code = request.form.get("Bank_AuthCode")
+    trans_id = request.form.get("Bank_Trans_ID")
+
+    if sonuc == "1":
+        return render_template("success.html",
+                               sonuc_str=sonuc_str,
+                               islem_id=islem_id,
+                               siparis_id=siparis_id,
+                               bank_auth_code=auth_code,
+                               bank_trans_id=trans_id)
+    else:
+        return render_template("error.html", sonuc=sonuc, sonuc_str=sonuc_str)
+
 if __name__ == "__main__":
     app.run(debug=True)

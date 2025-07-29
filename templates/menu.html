@@ -120,9 +120,22 @@
 
   <!-- Menü -->
   <div class="menu-container">
-  <h1>İşlem Menüsü</h1>
-  <button id="new-payment" onclick="location.href='/pay'">Yeni Ödeme</button>
-  <button id="cancel-refund" onclick="location.href='/iptal-islem'">İşlem İptal / İade</button>
+
+    <h2>İşlem Menüsü</h2>
+
+    <form action="/pay" method="get">
+        <button type="submit">Non-Secure Ödeme</button>
+    </form>
+
+    <form action="/pay_3d" method="get">
+        <button type="submit">3D Secure Ödeme</button>
+    </form>
+
+    <form action="/iptal_iade" method="get">
+        <button type="submit">İşlem İptal / İade</button>
+    </form>
+</div>
+
 </div>
 
 </body>
