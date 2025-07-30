@@ -1,0 +1,35 @@
+<!-- templates/3d_form_forward.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ödeme Yönlendiriliyor...</title>
+</head>
+<body>
+    <p>Lütfen bekleyin, ödeme sayfasına yönlendiriliyorsunuz...</p>
+
+    <form id="odemeForm" action="https://pos.ornekodeme.com/3dgate" method="POST">
+        <input type="hidden" name="client_code" value="{{ client_code }}">
+        <input type="hidden" name="GUID" value="{{ guid }}">
+        <input type="hidden" name="islem_tutar" value="{{ islem_tutar }}">
+        <input type="hidden" name="toplam_tutar" value="{{ toplam_tutar }}">
+        <input type="hidden" name="siparis_id" value="{{ siparis_id }}">
+        <input type="hidden" name="hata_url" value="{{ hata_url }}">
+        <input type="hidden" name="basarili_url" value="{{ basarili_url }}">
+        <input type="hidden" name="islemHash" value="{{ islem_hash }}">
+
+        <input type="hidden" name="kk_no" value="{{ kk_no }}">
+        <input type="hidden" name="kk_sahibi" value="{{ kk_sahibi }}">
+        <input type="hidden" name="kk_sk_ay" value="{{ kk_sk_ay }}">
+        <input type="hidden" name="kk_sk_yil" value="{{ kk_sk_yil }}">
+        <input type="hidden" name="kk_cvc" value="{{ kk_cvc }}">
+        <input type="hidden" name="taksit" value="{{ taksit }}">
+
+        <noscript><input type="submit" value="Devam Et"></noscript>
+    </form>
+
+    <script>
+      document.getElementById("odemeForm").submit();  // Otomatik post
+    </script>
+</body>
+</html>
