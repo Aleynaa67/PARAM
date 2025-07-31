@@ -1,13 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>3D Secure Doğrulama</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3D Secure Doğrulama</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .lock-icon::before {
+            content: "🔒";
+            font-size: 35px;
+            color: white;
+        }
+        .title {
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 4px;
+            width: 0%;
+            animation: progress 4s ease-out forwards;
+        }
+        @keyframes progress {
+            0% { width: 0%; }
+            25% { width: 25%; }
+            50% { width: 50%; }
+            75% { width: 75%; }
+            100% { width: 100%; }
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-box strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+        .waiting-text {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
-  <h2>3D Secure Ödeme Doğrulama</h2>
+    <div class="container">
+        <div class="lock-icon pulse"></div>
 
-  <!-- UCD_HTML içeriğini iframe içine göm -->
-  <iframe srcdoc="{{ ucd_html | safe }}" width="400" height="600" frameborder="0"></iframe>
+        <h1 class="title">3D Secure Doğrulama</h1>
+        <p class="subtitle">İşleminizin güvenliği için bankanız tarafından sağlanan doğrulama ekranına yönlendiriliyorsunuz.</p>
 
+        <div class="progress">
+            <div class="progress-bar"></div>
+        </div>
+
+        <div class="countdown" id="countdown">4</div>
+
+        <div class="info-box">
+            <strong>Güvenlik Bilgisi:</strong>
+            Bu işlem bankanızın güvenli sistemlerinde gerçekleştirilmektedir. Lütfen sayfayı kapatmayınız.
+        </div>
+
+        <div class="spinner"></div>
+        <p class="waiting-text">Bankanızın güvenlik sayfası hazırlanıyor...</p>
+    </div>
+
+    <!-- Bankanın formunu gizli olarak ekle -->
+    <div style="display: none;">
+        {{ ucd_html | safe }}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let countdown = 4;
+            const countdownElement = document.getElementById('countdown');
+            countdownElement.textContent = countdown;
+
+            const countdownTimer = setInterval(function() {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    countdownElement.textContent = "Yönlendiriliyor...";
+                } else {
+                    countdownElement.textContent = countdown;
+                }
+            }, 1000);
+
+            setTimeout(function() {
+                console.log("4 saniye sonra 3D forma yönlendiriliyor...");
+                var forms = document.forms;
+                if (forms.length > 0) {
+                    console.log("Form bulundu, gönderiliyor...");
+                    forms[0].submit();
+                } else {
+                    console.log("Form bulunamadı!");
+                }
+            }, 4000);
+        });
+    </script>
 </body>
 </html>

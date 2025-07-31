@@ -1,42 +1,131 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>3D Secure Ödeme</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #4B0082 0%, #2E0854 100%);
+            padding: 30px 20px 50px 20px;
+            margin: 0;
+        }
+
+        .fixed-tag {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: linear-gradient(180deg, #4B0082 0%, #2E0854 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            user-select: none;
+            z-index: 9999;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4B0082;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #00BFB3;
+            outline: none;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            background-color: #00BFB3;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #144174;
+        }
+    </style>
 </head>
 <body>
-    <h2>3D Secure Ödeme Formu</h2>
+
+
+<div class="fixed-tag">#SeninleDahaFazlası</div>
+
+<div class="form-container">
+    <h2>3D Secure Ödeme</h2>
     <form method="POST" action="/odeme-3d">
-        <label>Kart Sahibi Adı:</label><br>
-        <input type="text" name="kk_sahibi"><br>
+        <label for="kk_sahibi">Kart Sahibi Adı:</label>
+        <input type="text" id="kk_sahibi" name="kk_sahibi" placeholder="Ad Soyad" required />
 
-        <label>Kart Numarası:</label><br>
-        <input type="text" name="kk_no"><br>
+        <label for="kk_no">Kart Numarası:</label>
+        <input type="text" id="kk_no" name="kk_no" placeholder="1111 2222 3333 4444" required />
 
-        <label>Son Kullanma Ay:</label><br>
-        <input type="text" name="kk_sk_ay"><br>
+        <label for="kk_sk_ay">Son Kullanma Ay:</label>
+        <input type="text" id="kk_sk_ay" name="kk_sk_ay" placeholder="MM" maxlength="2" required />
 
-        <label>Son Kullanma Yıl:</label><br>
-        <input type="text" name="kk_sk_yil"><br>
+        <label for="kk_sk_yil">Son Kullanma Yıl:</label>
+        <input type="text" id="kk_sk_yil" name="kk_sk_yil" placeholder="YYYY" maxlength="4" required />
 
-        <label>CVC:</label><br>
-        <input type="text" name="kk_cvc"><br>
+        <label for="kk_cvc">CVC:</label>
+        <input type="text" id="kk_cvc" name="kk_cvc" placeholder="123" maxlength="3" required />
 
-        <label>Taksit:</label><br>
-        <input type="text" name="taksit" value="1"><br>
+        <label for="taksit">Taksit:</label>
+        <input type="number" id="taksit" name="taksit" value="1" min="1" required />
 
-        <label>İşlem Tutarı:</label><br>
-        <input type="text" name="islem_tutar"><br>
+        <label for="islem_tutar">İşlem Tutarı:</label>
+        <input type="text" id="islem_tutar" name="islem_tutar" placeholder="Örn: 100.00" required />
 
-        <label>Toplam Tutar:</label><br>
-        <input type="text" name="toplam_tutar"><br>
+        <label for="toplam_tutar">Toplam Tutar:</label>
+        <input type="text" id="toplam_tutar" name="toplam_tutar" placeholder="Örn: 100.00" required />
 
-        <label>Sipariş ID:</label><br>
-        <input type="text" name="siparis_id"><br><br>
+        <label for="siparis_id">Sipariş ID:</label>
+        <input type="text" id="siparis_id" name="siparis_id" required />
 
-        <input type="submit" value="Ödemeyi Başlat">
+        <input type="submit" value="Ödemeyi Başlat" />
     </form>
+</div>
 
+<script>
+    window.onload = function() {
+        window.scrollTo(0, 0);
+    };
+</script>
 
 </body>
 </html>

@@ -389,7 +389,7 @@ def odeme_3d():
 
     # URL'leri form'dan al veya varsayılan değerleri kullan
     basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/3d-sonuc"
-    hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-sonuc"
+    hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-hata"
 
     # 3D işlem hash hesapla
     islem_hash = calculate_3d_hash(
@@ -477,36 +477,28 @@ def odeme_3d():
 
 @app.route("/3d-sonuc", methods=["POST"])
 def sonuc_3d():
-    # Bankadan gelen tüm parametreleri al
+    # Bankadan gelen parametreleri al
     md = request.form.get("md", "")
     mdStatus = request.form.get("mdStatus", "")
     orderId = request.form.get("orderId", "")
     islemGUID = request.form.get("islemGUID", "")
     islemHash = request.form.get("islemHash", "")
 
-    # Diğer parametreler
     islem_tutar = request.form.get("islem_tutar", "")
     toplam_tutar = request.form.get("toplam_tutar", "")
     hata_url = request.form.get("hata_url", "")
     basarili_url = request.form.get("basarili_url", "")
-
-    sonuc = request.form.get("Sonuc")
-    sonuc_str = request.form.get("Sonuc_Str")
-    auth = request.form.get("Bank_AuthCode")
-    trans = request.form.get("Bank_Trans_ID")
 
     print("=== 3D Sonuç Parametreleri ===")
     print(f"mdStatus: {mdStatus}")
     print(f"orderId: {orderId}")
     print(f"islemGUID: {islemGUID}")
     print(f"Gelen Hash: {islemHash}")
-    print(f"sonuc: {sonuc}")
-    print(f"sonuc_str: {sonuc_str}")
 
-    # Hash doğrulama
+    # Hash hesapla ve kontrol et
     hesaplanan_hash = calculate_3d_hash(
         CLIENT_CODE,
-        islemGUID or GUID,  # Eğer islemGUID boşsa varsayılan GUID kullan
+        islemGUID or GUID,
         islem_tutar,
         toplam_tutar,
         orderId,
@@ -516,24 +508,79 @@ def sonuc_3d():
 
     print(f"Hesaplanan Hash: {hesaplanan_hash}")
 
-    # 3D doğrulama kontrolü
-    if mdStatus == "1" and sonuc == "1":
-        return render_template("success.html",
-                               sonuc_str=sonuc_str,
-                               bank_auth_code=auth,
-                               bank_trans_id=trans,
-                               siparis_id=orderId,
-                               islem_tutar=islem_tutar,
-                               toplam_tutar=toplam_tutar)
-    else:
-        error_msg = f"3D Doğrulama Başarısız - mdStatus: {mdStatus}, Sonuc: {sonuc}"
-        if sonuc_str:
-            error_msg = sonuc_str
+    # 3D doğrulama başarılıysa devam et
+    if mdStatus == "1":
+        print("✅ 3D onayı başarılı, ödeme finalize ediliyor...")
 
+        final_hash = hesaplanan_hash  # Aynı hash kullanılabilir
+
+        xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
+        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                       xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+          <soap:Body>
+            <TP_Islem_Odeme_WMD xmlns="https://turkpos.com.tr/">
+              <G>
+                <CLIENT_CODE>10738</CLIENT_CODE>
+                <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
+                <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
+              </G>
+              <GUID>{islemGUID}</GUID>
+              <Siparis_ID>{orderId}</Siparis_ID>
+              <Islem_Tutar>{islem_tutar}</Islem_Tutar>
+              <Toplam_Tutar>{toplam_tutar}</Toplam_Tutar>
+              <Islem_Hash>{final_hash}</Islem_Hash>
+            </TP_Islem_Odeme_OnProv_WMD>
+          </soap:Body>
+        </soap:Envelope>"""
+
+        headers = {
+            "Content-Type": "text/xml; charset=utf-8",
+            "SOAPAction": '"https://turkpos.com.tr/TP_Islem_Odeme_OnProv_WMD"'  # çift tırnak önemli
+        }
+
+        url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+        response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Text: {response.text}")
+
+        try:
+            root = ET.fromstring(response.text)
+            ns = {
+                'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+                'ns': 'https://turkpos.com.tr/'
+            }
+
+            result = root.find(".//ns:TP_Islem_Odeme_WMDResult", ns)
+            sonuc = result.find("ns:Sonuc", ns).text
+            sonuc_str = result.find("ns:Sonuc_Str", ns).text
+            auth_code = result.find("ns:Bank_AuthCode", ns).text
+            trans_id = result.find("ns:Bank_Trans_ID", ns).text
+
+            if sonuc == "1":
+                return render_template("success.html",
+                                       sonuc_str=sonuc_str,
+                                       bank_auth_code=auth_code,
+                                       bank_trans_id=trans_id,
+                                       siparis_id=orderId,
+                                       islem_tutar=islem_tutar,
+                                       toplam_tutar=toplam_tutar)
+            else:
+                return render_template("error.html",
+                                       sonuc="FAILED",
+                                       sonuc_str=sonuc_str,
+                                       mdStatus=mdStatus)
+
+        except Exception as e:
+            return f"<h3>XML Parse Hatası</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
+
+    else:
         return render_template("error.html",
                                sonuc="3D_FAILED",
-                               sonuc_str=error_msg,
+                               sonuc_str="3D doğrulama başarısız",
                                mdStatus=mdStatus)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
