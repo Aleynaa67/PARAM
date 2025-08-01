@@ -483,8 +483,6 @@ def sonuc_3d():
     orderId = request.form.get("orderId", "")
     islemGUID = request.form.get("islemGUID", "")
     islemHash = request.form.get("islemHash", "")
-
-    # Transaction amount'u al
     transaction_amount = request.form.get("transactionAmount", "")
 
     # Form'dan gelen ek parametreler (bankadan gelmiyorsa session'dan al)
@@ -524,7 +522,6 @@ def sonuc_3d():
         # - Siparis_ID (order ID)
         # Hash gerekmez!
 
-        # Param POS dokümantasyonuna göre DOĞRU XML yapısı - TP_WMD_Pay
         xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -546,7 +543,7 @@ def sonuc_3d():
 
         headers = {
             "Content-Type": "text/xml; charset=utf-8",
-            "SOAPAction": "https://turkpos.com.tr/TP_WMD_Pay"  # Doğru SOAP Action
+            "SOAPAction": "https://turkpos.com.tr/TP_WMD_Pay"
         }
 
         url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
@@ -618,6 +615,12 @@ def sonuc_3d():
                                sonuc="3D_FAILED",
                                sonuc_str=f"3D doğrulama başarısız (mdStatus: {mdStatus})",
                                mdStatus=mdStatus)
+
+@app.route("/3d-hata", methods=["GET", "POST"])
+def hata_3d():
+    return render_template("error.html", sonuc="3D_RED", sonuc_str="3D işlem başarısız veya kullanıcı iptal etti.")
+
+
 
 
 # Finalize hash fonksiyonu (Param POS dokümantasyonuna göre düzeltildi)

@@ -7,7 +7,7 @@
   <style>
     body {
       margin: 0;
-      background-color: #4B0082;
+      background: linear-gradient(135deg, #4B0082 0%, #2E0052 100%);
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       flex-direction: column;
@@ -17,6 +17,142 @@
       color: #fff;
       position: relative;
       overflow: hidden;
+    }
+
+    .param-link {
+      position: fixed;
+      top: 30%;
+      left: 20px;
+      transform: translateY(-50%);
+      background-color: #ffffff;
+      color: #4b0082;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .param-link:hover {
+      background-color: #e0e0e0;
+      color: #000000;
+    }
+
+    /* Dalga Animasyonları */
+    .wave {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 191, 179, 0.2), transparent);
+      animation: waveMove 3s ease-in-out infinite;
+    }
+
+    .wave:nth-child(2) {
+      animation-delay: 1s;
+      background: linear-gradient(90deg, transparent, rgba(0, 191, 179, 0.15), transparent);
+    }
+
+    .wave:nth-child(3) {
+      animation-delay: 2s;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    @keyframes waveMove {
+      0% {
+        left: -100%;
+        transform: skewX(-15deg);
+      }
+      50% {
+        left: 100%;
+        transform: skewX(-15deg);
+      }
+      100% {
+        left: 100%;
+        transform: skewX(-15deg);
+      }
+    }
+
+    /* Çembersel Dalga Animasyonu */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 191, 179, 0.3) 0%, transparent 70%);
+      animation: rippleExpand 4s ease-out infinite;
+    }
+
+    .ripple:nth-child(1) {
+      width: 200px;
+      height: 200px;
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .ripple:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      top: 60%;
+      right: 15%;
+      animation-delay: 1.5s;
+    }
+
+    .ripple:nth-child(3) {
+      width: 100px;
+      height: 100px;
+      bottom: 20%;
+      left: 20%;
+      animation-delay: 3s;
+    }
+
+    @keyframes rippleExpand {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    /* SVG Dalga Arka Planı */
+    .wave-background {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .wave-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      animation: waveFlow 8s ease-in-out infinite;
+    }
+
+    @keyframes waveFlow {
+      0% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(-25%);
+      }
+      100% {
+        transform: translateX(0);
+      }
     }
 
     .background-pattern {
@@ -31,10 +167,20 @@
       position: absolute;
       font-size: 80px;
       font-weight: bold;
-      opacity: 0.15;
+      opacity: 0.1;
       user-select: none;
       transform-origin: center;
       font-family: Arial, Helvetica, sans-serif;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotate(5deg);
+      }
     }
 
     .p-shape {
@@ -52,10 +198,23 @@
       margin-bottom: 20px;
       z-index: 1;
       letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(0, 191, 179, 0.5);
+      animation: logoGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes logoGlow {
+      from {
+        text-shadow: 0 0 20px rgba(0, 191, 179, 0.5);
+      }
+      to {
+        text-shadow: 0 0 30px rgba(0, 191, 179, 0.8);
+      }
     }
 
     .menu-container {
-      background-color: #00BFB3;
+      background: rgba(0, 191, 179, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 12px;
       padding: 40px;
       width: 320px;
@@ -64,9 +223,19 @@
       color: #ffffff;
       position: relative;
       z-index: 1;
+      animation: menuFloat 4s ease-in-out infinite;
     }
 
-    h1 {
+    @keyframes menuFloat {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    h1, h2 {
       margin-bottom: 30px;
       font-weight: 600;
       font-size: 1.8rem;
@@ -83,44 +252,82 @@
       border-radius: 6px;
       cursor: pointer;
       color: #fff;
-      background-color: #191919;
-      transition: background-color 0.3s ease;
+      background: linear-gradient(135deg, #191919, #2a2a2a);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover::before {
+      left: 100%;
     }
 
     button:hover {
-      background-color: #191919;
+      background: linear-gradient(135deg, #2a2a2a, #404040);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+
+
   </style>
 </head>
 <body>
+  <!-- Dalga Animasyonları -->
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+
+  <!-- Çembersel Dalgalar -->
+  <div class="ripple"></div>
+  <div class="ripple"></div>
+  <div class="ripple"></div>
+
+  <!-- SVG Dalga Arka Planı -->
+  <div class="wave-background">
+    <svg class="wave-svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M0,60L80,65C160,70,320,80,480,75C640,70,800,50,960,55C1120,60,1280,90,1360,105L1440,120L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+            fill="rgba(0,191,179,0.3)"></path>
+    </svg>
+  </div>
 
   <!-- Arka plan desenleri -->
   <div class="background-pattern" aria-hidden="true">
-    <div class="p-shape" style="top: 5%; left: 10%; transform: rotate(-20deg); font-size: 100px;">P</div>
-    <div class="p-shape" style="top: 15%; left: 40%; transform: rotate(15deg); font-size: 80px;">P</div>
-    <div class="p-shape" style="top: 25%; left: 70%; transform: rotate(-30deg); font-size: 90px;">P</div>
-    <div class="p-shape" style="top: 40%; left: 15%; transform: rotate(25deg); font-size: 120px;">P</div>
-    <div class="p-shape" style="top: 50%; left: 50%; transform: rotate(-45deg); font-size: 90px;">P</div>
-    <div class="p-shape" style="top: 60%; left: 75%; transform: rotate(10deg); font-size: 100px;">P</div>
-    <div class="p-shape" style="top: 70%; left: 30%; transform: rotate(-10deg); font-size: 110px;">P</div>
-    <div class="p-shape" style="top: 80%; left: 60%; transform: rotate(5deg); font-size: 85px;">P</div>
-    <div class="p-shape" style="top: 85%; left: 85%; transform: rotate(-15deg); font-size: 95px;">P</div>
-    <div class="p-shape" style="top: 35%; left: 80%; transform: rotate(20deg); font-size: 75px;">P</div>
+    <div class="p-shape" style="top: 5%; left: 10%; transform: rotate(-20deg); font-size: 100px; animation-delay: 0s;">P</div>
+    <div class="p-shape" style="top: 15%; left: 40%; transform: rotate(15deg); font-size: 80px; animation-delay: 1s;">P</div>
+    <div class="p-shape" style="top: 25%; left: 70%; transform: rotate(-30deg); font-size: 90px; animation-delay: 2s;">P</div>
+    <div class="p-shape" style="top: 40%; left: 15%; transform: rotate(25deg); font-size: 120px; animation-delay: 0.5s;">P</div>
+    <div class="p-shape" style="top: 50%; left: 50%; transform: rotate(-45deg); font-size: 90px; animation-delay: 1.5s;">P</div>
+    <div class="p-shape" style="top: 60%; left: 75%; transform: rotate(10deg); font-size: 100px; animation-delay: 2.5s;">P</div>
+    <div class="p-shape" style="top: 70%; left: 30%; transform: rotate(-10deg); font-size: 110px; animation-delay: 0.3s;">P</div>
+    <div class="p-shape" style="top: 80%; left: 60%; transform: rotate(5deg); font-size: 85px; animation-delay: 1.8s;">P</div>
+    <div class="p-shape" style="top: 85%; left: 85%; transform: rotate(-15deg); font-size: 95px; animation-delay: 2.2s;">P</div>
+    <div class="p-shape" style="top: 35%; left: 80%; transform: rotate(20deg); font-size: 75px; animation-delay: 1.2s;">P</div>
 
     <!-- Kredi kartı ikonları -->
-    <div class="icon-card" style="top: 10%; left: 85%; transform: rotate(10deg); font-size: 60px;">💳</div>
-    <div class="icon-card" style="top: 20%; left: 20%; transform: rotate(-15deg); font-size: 50px;">💳</div>
-    <div class="icon-card" style="top: 45%; left: 65%; transform: rotate(30deg); font-size: 65px;">💳</div>
-    <div class="icon-card" style="top: 75%; left: 10%; transform: rotate(-10deg); font-size: 55px;">💳</div>
-    <div class="icon-card" style="top: 90%; left: 40%; transform: rotate(5deg); font-size: 70px;">💳</div>
+    <div class="icon-card" style="top: 10%; left: 85%; transform: rotate(10deg); font-size: 60px; animation-delay: 0.8s;">💳</div>
+    <div class="icon-card" style="top: 20%; left: 20%; transform: rotate(-15deg); font-size: 50px; animation-delay: 1.3s;">💳</div>
+    <div class="icon-card" style="top: 45%; left: 65%; transform: rotate(30deg); font-size: 65px; animation-delay: 2.1s;">💳</div>
+    <div class="icon-card" style="top: 75%; left: 10%; transform: rotate(-10deg); font-size: 55px; animation-delay: 0.7s;">💳</div>
+    <div class="icon-card" style="top: 90%; left: 40%; transform: rotate(5deg); font-size: 70px; animation-delay: 1.7s;">💳</div>
   </div>
 
-  <!-- PARAM logosu (yazı olarak) -->
+  <!-- PARAM logosu -->
   <div class="param-logo">PARAM</div>
+
 
   <!-- Menü -->
   <div class="menu-container">
-
     <h2>İşlem Menüsü</h2>
 
     <form action="/pay" method="get">
@@ -132,14 +339,8 @@
     </form>
 
     <form action="/iptal-islem" method="GET">
-    <button type="submit">İşlem İptal / İade</button>
-</form>
-
-
-</div>
-
-
-</div>
-
+        <button type="submit">İşlem İptal / İade</button>
+    </form>
+  </div>
 </body>
 </html>
