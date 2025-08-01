@@ -5,190 +5,521 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ödeme Başarılı</title>
   <style>
-    :root {
-      --purple: #4B0082;
-      --light-purple: #7b34b4;
-      --blue: #30D5C8;
-      --white: #fff;
-      --gray: #555;
-      --success: #00c853;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(145deg, var(--purple), var(--blue));
-      color: var(--gray);
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow-x: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+      animation: backgroundMove 20s ease-in-out infinite;
+    }
+
+    @keyframes backgroundMove {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-20px, -20px) rotate(1deg); }
     }
 
     .container {
-      background: var(--white);
-      padding: 40px;
-      border-radius: 18px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+      max-width: 550px;
+      margin: 50px auto;
+      padding: 50px 40px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(15px);
+      position: relative;
+      z-index: 1;
+      animation: slideInUp 0.8s ease-out;
       text-align: center;
-      max-width: 520px;
-      width: 90%;
     }
 
-    h2 {
-      color: var(--purple);
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    .subtext {
-      font-size: 1rem;
-      color: #666;
-      margin-bottom: 25px;
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .success-icon {
-      margin-bottom: 25px;
+      margin-bottom: 30px;
+      position: relative;
     }
 
-    svg {
-      width: 80px;
-      height: 80px;
-      fill: var(--purple);
-      animation: pop 0.4s ease-out;
+    .success-icon .checkmark {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: bounceIn 0.6s ease-out 0.2s both;
+      box-shadow: 0 15px 30px rgba(76, 175, 80, 0.3);
     }
 
-    @keyframes pop {
-      0% { transform: scale(0.7); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.3);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      text-align: left;
-      margin-top: 20px;
-      font-size: 0.95rem;
+    .checkmark svg {
+      width: 50px;
+      height: 50px;
+      stroke: white;
+      stroke-width: 3;
+      fill: none;
+      animation: drawCheck 0.8s ease-out 0.4s both;
     }
 
-    li {
-      padding: 8px 0;
-      border-bottom: 1px solid #e0e0e0;
+    @keyframes drawCheck {
+      0% {
+        stroke-dasharray: 0 50;
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dasharray: 50 0;
+        stroke-dashoffset: 0;
+      }
+    }
+
+    h2 {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.2em;
+      font-weight: 700;
+      margin-bottom: 15px;
+      animation: fadeInUp 0.6s ease-out 0.6s both;
+    }
+
+    .subtext {
+      color: #666;
+      font-size: 1.1em;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease-out 0.8s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .details-card {
+      background: linear-gradient(135deg, #f8f9ff, #f1f3ff);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      border-radius: 15px;
+      padding: 30px;
+      margin: 30px 0;
+      position: relative;
+      animation: fadeInUp 0.6s ease-out 1s both;
+    }
+
+    .details-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      padding: 2px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 15px;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      -webkit-mask-composite: xor;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+
+    .detail-item:hover {
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 8px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-value {
+      font-weight: 500;
+      color: #667eea;
+      font-family: 'Courier New', monospace;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
     }
 
     .button-group {
       display: flex;
-      gap: 10px;
+      gap: 15px;
       justify-content: center;
       flex-wrap: wrap;
-      margin-top: 30px;
+      margin-top: 40px;
+      animation: fadeInUp 0.6s ease-out 1.2s both;
     }
 
     .button {
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 1rem;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 600;
       cursor: pointer;
       text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .p-shape, .icon-card {
-      position: absolute;
-      font-size: 80px;
-      font-weight: bold;
-      opacity: 0.15;
-      user-select: none;
-      transform-origin: center;
-      font-family: Arial, Helvetica, sans-serif;
+      transition: all 0.3s ease;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .button.primary {
-      background: var(--purple);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      border: none;
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
     }
 
-    .icon-card {
-      color: #ffffff;
+    .button.primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .button.primary:hover::before {
+      left: 100%;
     }
 
     .button.primary:hover {
-      background: #5e00a1;
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
     }
 
     .button.secondary {
-      background: #f3f3f3;
-      color: #333;
-      border: 1px solid #ccc;
+      background: rgba(255, 255, 255, 0.9);
+      color: #667eea;
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 
     .button.secondary:hover {
-      background: #e0e0e0;
+      background: rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      border-color: #667eea;
     }
 
-    @media (max-width: 480px) {
-      .container {
-        padding: 25px;
+    /* Floating particles effect */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      animation: fallDown ease-in-out infinite;
+      top: -10px;
+    }
+
+    @keyframes fallDown {
+      0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 0;
       }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Different sizes and speeds for particles */
+    .particle:nth-child(1) { left: 5%; width: 3px; height: 3px; animation-duration: 8s; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 15%; width: 4px; height: 4px; animation-duration: 10s; animation-delay: 1s; }
+    .particle:nth-child(3) { left: 25%; width: 2px; height: 2px; animation-duration: 7s; animation-delay: 2s; }
+    .particle:nth-child(4) { left: 35%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 0.5s; }
+    .particle:nth-child(5) { left: 45%; width: 3px; height: 3px; animation-duration: 9s; animation-delay: 3s; }
+    .particle:nth-child(6) { left: 55%; width: 4px; height: 4px; animation-duration: 11s; animation-delay: 1.5s; }
+    .particle:nth-child(7) { left: 65%; width: 2px; height: 2px; animation-duration: 6s; animation-delay: 4s; }
+    .particle:nth-child(8) { left: 75%; width: 6px; height: 6px; animation-duration: 13s; animation-delay: 2.5s; }
+    .particle:nth-child(9) { left: 85%; width: 3px; height: 3px; animation-duration: 8s; animation-delay: 5s; }
+    .particle:nth-child(10) { left: 95%; width: 4px; height: 4px; animation-duration: 10s; animation-delay: 3.5s; }
+    .particle:nth-child(11) { left: 10%; width: 2px; height: 2px; animation-duration: 7s; animation-delay: 6s; }
+    .particle:nth-child(12) { left: 20%; width: 5px; height: 5px; animation-duration: 14s; animation-delay: 1.2s; }
+    .particle:nth-child(13) { left: 30%; width: 3px; height: 3px; animation-duration: 9s; animation-delay: 4.5s; }
+    .particle:nth-child(14) { left: 40%; width: 4px; height: 4px; animation-duration: 11s; animation-delay: 0.8s; }
+    .particle:nth-child(15) { left: 50%; width: 2px; height: 2px; animation-duration: 6s; animation-delay: 7s; }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .container {
+        margin: 20px;
+        padding: 30px 20px;
+      }
+
       h2 {
-        font-size: 1.6rem;
+        font-size: 1.8em;
+      }
+
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .button {
+        width: 100%;
+        max-width: 250px;
+      }
+
+      .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .detail-value {
+        align-self: flex-end;
+      }
+    }
+
+    /* Success celebration animation */
+    .celebration {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #667eea;
+      animation: confettiFall 3s ease-out infinite;
+    }
+
+    .confetti:nth-child(odd) {
+      background: #764ba2;
+      animation-delay: 0.5s;
+    }
+
+    .confetti:nth-child(3n) {
+      background: #4CAF50;
+      animation-delay: 1s;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100px) rotate(720deg);
+        opacity: 0;
       }
     }
   </style>
 </head>
 <body>
-<div class="background-pattern" aria-hidden="true">
-    <div class="p-shape" style="top: 5%; left: 10%; transform: rotate(-20deg); font-size: 100px;">P</div>
-    <div class="p-shape" style="top: 15%; left: 40%; transform: rotate(15deg); font-size: 80px;">P</div>
-    <div class="p-shape" style="top: 25%; left: 70%; transform: rotate(-30deg); font-size: 90px;">P</div>
-    <div class="p-shape" style="top: 40%; left: 15%; transform: rotate(25deg); font-size: 120px;">P</div>
-    <div class="p-shape" style="top: 50%; left: 50%; transform: rotate(-45deg); font-size: 90px;">P</div>
-    <div class="p-shape" style="top: 60%; left: 75%; transform: rotate(10deg); font-size: 100px;">P</div>
-    <div class="p-shape" style="top: 70%; left: 30%; transform: rotate(-10deg); font-size: 110px;">P</div>
-    <div class="p-shape" style="top: 80%; left: 60%; transform: rotate(5deg); font-size: 85px;">P</div>
-    <div class="p-shape" style="top: 85%; left: 85%; transform: rotate(-15deg); font-size: 95px;">P</div>
-    <div class="p-shape" style="top: 35%; left: 80%; transform: rotate(20deg); font-size: 75px;">P</div>
-
-    <!-- Kredi kartı ikonları -->
-    <div class="icon-card" style="top: 10%; left: 85%; transform: rotate(10deg); font-size: 60px;">💳</div>
-    <div class="icon-card" style="top: 20%; left: 20%; transform: rotate(-15deg); font-size: 50px;">💳</div>
-    <div class="icon-card" style="top: 45%; left: 65%; transform: rotate(30deg); font-size: 65px;">💳</div>
-    <div class="icon-card" style="top: 75%; left: 10%; transform: rotate(-10deg); font-size: 55px;">💳</div>
-    <div class="icon-card" style="top: 90%; left: 40%; transform: rotate(5deg); font-size: 70px;">💳</div>
-  </div>
-
-
+  <!-- Floating particles -->
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
 
   <div class="container">
     <div class="success-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" fill="var(--purple)" />
-        <polyline points="7 13 10 16 17 9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <div class="checkmark">
+        <svg viewBox="0 0 24 24">
+          <polyline points="7,13 10,16 17,9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
     </div>
-    <h2>Ödemeniz başarıyla tamamlandı 🎉</h2>
-    <p class="subtext">Aşağıda işlem detaylarını görebilirsiniz.</p>
 
-    <ul>
-      <li><strong>İşlem ID:</strong> {{ islem_id }}</li>
-      <li><strong>Banka İşlem ID:</strong> {{ bank_trans_id }}</li>
-      <li><strong>Auth Kodu:</strong> {{ bank_auth_code }}</li>
-      <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
-      <li><strong>İşlem Tutarı:</strong> {{ islem_tutar }}</li>
-    </ul>
+    <h2>Ödemeniz Başarıyla Tamamlandı!</h2>
+    <p class="subtext">İşlem detaylarınız aşağıda yer almaktadır</p>
 
-    <form action="{{ url_for('dekont_success') }}" method="POST" style="margin-top: 20px;">
+    <div class="details-card">
+      <div class="detail-item">
+        <div class="detail-label">
+          <span>🔢</span>
+          <span>İşlem ID</span>
+        </div>
+        <div class="detail-value">{{ islem_id }}</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <span>🏦</span>
+          <span>Banka İşlem ID</span>
+        </div>
+        <div class="detail-value">{{ bank_trans_id }}</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <span>🔐</span>
+          <span>Auth Kodu</span>
+        </div>
+        <div class="detail-value">{{ bank_auth_code }}</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <span>📦</span>
+          <span>Sipariş ID</span>
+        </div>
+        <div class="detail-value">{{ siparis_id }}</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <span>💰</span>
+          <span>İşlem Tutarı</span>
+        </div>
+        <div class="detail-value">{{ islem_tutar }}</div>
+      </div>
+    </div>
+
+    <form action="{{ url_for('dekont_success') }}" method="POST">
       <input type="hidden" name="islem_id" value="{{ islem_id }}">
       <input type="hidden" name="siparis_id" value="{{ siparis_id }}">
       <input type="hidden" name="toplam_tutar" value="{{ toplam_tutar }}">
       <input type="hidden" name="islem_tutar" value="{{ islem_tutar }}">
 
       <div class="button-group">
-        <button type="submit" class="button primary">📄 Dekont Göster</button>
-        <a href="/" class="button secondary">🏠 Ana Sayfa</a>
+        <button type="submit" class="button primary">
+          <span>📄</span>
+          <span>Dekont Göster</span>
+        </button>
+        <a href="/" class="button secondary">
+          <span>🏠</span>
+          <span>Ana Sayfa</span>
+        </a>
       </div>
     </form>
   </div>
+
+  <script>
+    // Add celebration confetti effect
+    function createConfetti() {
+      const celebration = document.createElement('div');
+      celebration.className = 'celebration';
+      document.body.appendChild(celebration);
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 200 - 100 + 'px';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+        celebration.appendChild(confetti);
+      }
+
+      // Remove celebration after animation
+      setTimeout(() => {
+        document.body.removeChild(celebration);
+      }, 5000);
+    }
+
+    // Trigger celebration after page load
+    window.addEventListener('load', () => {
+      setTimeout(createConfetti, 800);
+    });
+
+    // Add hover effects to detail items
+    const detailItems = document.querySelectorAll('.detail-item');
+    detailItems.forEach(item => {
+      item.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateX(5px)';
+      });
+
+      item.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateX(0)';
+      });
+    });
+  </script>
 </body>
 </html>
