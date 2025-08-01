@@ -484,8 +484,12 @@ def sonuc_3d():
     islemGUID = request.form.get("islemGUID", "")
     islemHash = request.form.get("islemHash", "")
 
-    islem_tutar = request.form.get("islem_tutar", "")
-    toplam_tutar = request.form.get("toplam_tutar", "")
+    # Transaction amount'u al
+    transaction_amount = request.form.get("transactionAmount", "")
+
+    # Form'dan gelen ek parametreler (bankadan gelmiyorsa session'dan al)
+    islem_tutar = transaction_amount.replace(".", "").replace(",", ".") if transaction_amount else ""
+    toplam_tutar = islem_tutar  # Aynı değer olacak
     hata_url = request.form.get("hata_url", "")
     basarili_url = request.form.get("basarili_url", "")
 
@@ -493,56 +497,71 @@ def sonuc_3d():
     print(f"mdStatus: {mdStatus}")
     print(f"orderId: {orderId}")
     print(f"islemGUID: {islemGUID}")
+    print(f"transaction_amount: {transaction_amount}")
+    print(f"islem_tutar: {islem_tutar}")
+    print(f"md: {md}")
     print(f"Gelen Hash: {islemHash}")
+    print(f"Gelen tüm form data: {dict(request.form)}")
 
-    # Hash hesapla ve kontrol et
-    hesaplanan_hash = calculate_3d_hash(
-        CLIENT_CODE,
-        islemGUID or GUID,
-        islem_tutar,
-        toplam_tutar,
-        orderId,
-        hata_url or "http://localhost:5000/3d-sonuc",
-        basarili_url or "http://localhost:5000/3d-sonuc"
-    )
+    # ÖNEMLİ: 3D başlatmada kullanılan GUID'i kullan, bankadan geleni değil!
+    # Çünkü Param POS 3D başlatmadaki GUID ile işlemi eşleştiriyor
+    current_guid = GUID  # 3D başlatmada kullanılan GUID
 
-    print(f"Hesaplanan Hash: {hesaplanan_hash}")
+    print(f"3D başlatmada kullanılan GUID: {GUID}")
+    print(f"Bankadan gelen GUID: {islemGUID}")
+    print(f"Finalize için kullanılacak GUID: {current_guid}")
+    print(f"GUID uzunluğu: {len(current_guid)}")
 
     # 3D doğrulama başarılıysa devam et
     if mdStatus == "1":
         print("✅ 3D onayı başarılı, ödeme finalize ediliyor...")
 
-        final_hash = hesaplanan_hash  # Aynı hash kullanılabilir
+        # Param POS dokümantasyonuna göre TP_WMD_Pay sadece bu parametreleri kullanır:
+        # - G (güvenlik nesnesi)
+        # - GUID (36 karakter)
+        # - UCD_MD (bankadan gelen md değeri)
+        # - Islem_GUID (aynı GUID)
+        # - Siparis_ID (order ID)
+        # Hash gerekmez!
 
+        # Param POS dokümantasyonuna göre DOĞRU XML yapısı - TP_WMD_Pay
         xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
-        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                       xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-          <soap:Body>
-            <TP_Islem_Odeme_WMD xmlns="https://turkpos.com.tr/">
-              <G>
-                <CLIENT_CODE>10738</CLIENT_CODE>
-                <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
-                <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
-              </G>
-              <GUID>{islemGUID}</GUID>
-              <Siparis_ID>{orderId}</Siparis_ID>
-              <Islem_Tutar>{islem_tutar}</Islem_Tutar>
-              <Toplam_Tutar>{toplam_tutar}</Toplam_Tutar>
-              <Islem_Hash>{final_hash}</Islem_Hash>
-            </TP_Islem_Odeme_OnProv_WMD>
-          </soap:Body>
-        </soap:Envelope>"""
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <TP_WMD_Pay xmlns="https://turkpos.com.tr/">
+      <G>
+        <CLIENT_CODE>{CLIENT_CODE}</CLIENT_CODE>
+        <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
+        <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
+      </G>
+      <GUID>{current_guid}</GUID>
+      <UCD_MD>{md}</UCD_MD>
+      <Islem_GUID>{current_guid}</Islem_GUID>
+      <Siparis_ID>{orderId}</Siparis_ID>
+    </TP_WMD_Pay>
+  </soap:Body>
+</soap:Envelope>"""
 
         headers = {
             "Content-Type": "text/xml; charset=utf-8",
-            "SOAPAction": '"https://turkpos.com.tr/TP_Islem_Odeme_OnProv_WMD"'  # çift tırnak önemli
+            "SOAPAction": "https://turkpos.com.tr/TP_WMD_Pay"  # Doğru SOAP Action
         }
 
         url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+
+        print("Finalize XML:", xml_data)
         response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)
         print(f"Status Code: {response.status_code}")
         print(f"Response Text: {response.text}")
+
+        # Boş response kontrolü
+        if not response.text.strip():
+            return render_template("error.html",
+                                   sonuc="EMPTY_RESPONSE",
+                                   sonuc_str="Servisten boş yanıt geldi",
+                                   mdStatus=mdStatus)
 
         try:
             root = ET.fromstring(response.text)
@@ -551,11 +570,27 @@ def sonuc_3d():
                 'ns': 'https://turkpos.com.tr/'
             }
 
-            result = root.find(".//ns:TP_Islem_Odeme_WMDResult", ns)
-            sonuc = result.find("ns:Sonuc", ns).text
-            sonuc_str = result.find("ns:Sonuc_Str", ns).text
-            auth_code = result.find("ns:Bank_AuthCode", ns).text
-            trans_id = result.find("ns:Bank_Trans_ID", ns).text
+            # Doğru result tag'ini bul - TP_WMD_Pay için
+            result = root.find(".//ns:TP_WMD_PayResult", ns)
+
+            if result is None:
+                return f"<h3>Result Tag Bulunamadı</h3><pre>{response.text}</pre>"
+
+            # Güvenli XML okuma - Param POS response formatına göre
+            sonuc_tag = result.find("ns:Sonuc", ns)
+            sonuc = sonuc_tag.text if sonuc_tag is not None else "0"
+
+            sonuc_str_tag = result.find("ns:Sonuc_Ack", ns)  # Param POS'ta Sonuc_Ack kullanılıyor
+            sonuc_str = sonuc_str_tag.text if sonuc_str_tag is not None else "Bilinmeyen hata"
+
+            # Bu alanlar olmayabilir, kontrol et
+            auth_code_tag = result.find("ns:Bank_AuthCode", ns)
+            auth_code = auth_code_tag.text if auth_code_tag is not None else "N/A"
+
+            trans_id_tag = result.find("ns:Bank_Trans_ID", ns)
+            trans_id = trans_id_tag.text if trans_id_tag is not None else "N/A"
+
+            print(f"Sonuc: {sonuc}, Sonuc_Str: {sonuc_str}")
 
             if sonuc == "1":
                 return render_template("success.html",
@@ -567,20 +602,39 @@ def sonuc_3d():
                                        toplam_tutar=toplam_tutar)
             else:
                 return render_template("error.html",
-                                       sonuc="FAILED",
+                                       sonuc="PAYMENT_FAILED",
                                        sonuc_str=sonuc_str,
                                        mdStatus=mdStatus)
 
-        except Exception as e:
+        except ET.ParseError as e:
+            print(f"XML Parse Error: {e}")
             return f"<h3>XML Parse Hatası</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
+        except Exception as e:
+            print(f"General Error: {e}")
+            return f"<h3>İşlem Hatası</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
     else:
         return render_template("error.html",
                                sonuc="3D_FAILED",
-                               sonuc_str="3D doğrulama başarısız",
+                               sonuc_str=f"3D doğrulama başarısız (mdStatus: {mdStatus})",
                                mdStatus=mdStatus)
 
 
+# Finalize hash fonksiyonu (Param POS dokümantasyonuna göre düzeltildi)
+def calculate_finalize_hash(islem_guid, md, md_status, order_id, store_key):
+    """3D işlem finalize için hash hesaplar - Param POS formatına göre"""
+    import hashlib
+    import base64
 
+    # Param POS finalize hash formatı: islemGUID + md + mdStatus + orderId + STORE_KEY
+    raw = islem_guid + md + md_status + order_id + store_key.lower()
+    print(f"Finalize Hash Raw String: {raw}")
+
+    # SHA-1 + Base64
+    sha1_hash = hashlib.sha1(raw.encode('utf-8')).digest()
+    hash_result = base64.b64encode(sha1_hash).decode('utf-8')
+
+    print(f"Finalize Hash Result: {hash_result}")
+    return hash_result
 if __name__ == "__main__":
     app.run(debug=True)
