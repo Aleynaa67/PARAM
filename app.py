@@ -14,20 +14,20 @@ CLIENT_USERNAME = "Test"
 CLIENT_PASSWORD = "Test"
 
 
-# Normal işlem hash hesaplama
+
 def calculate_islem_hash(client_code, guid, taksit, islem_tutar, toplam_tutar, siparis_id):
     raw = client_code + guid + taksit + islem_tutar + toplam_tutar + siparis_id
     hashed = hashlib.sha1(raw.encode("ISO-8859-9")).digest()
     return base64.b64encode(hashed).decode("utf-8")
 
 
-# 3D hash hesaplama - DÜZELTİLDİ
+
 def calculate_3d_hash(client_code, guid, islem_tutar, toplam_tutar, siparis_id, hata_url, basarili_url):
     # 3D işlem için hash formatı farklı olmalı
     raw = client_code + guid + islem_tutar + toplam_tutar + siparis_id + hata_url + basarili_url
     print(f"3D Hash Raw String: {raw}")
 
-    # SHA-1 kullanarak hash hesapla (3D için genellikle SHA-1 kullanılır)
+
     sha1_hash = hashlib.sha1(raw.encode('utf-8')).digest()
     hash_result = base64.b64encode(sha1_hash).decode('utf-8')
 
@@ -387,11 +387,11 @@ def odeme_3d():
     toplam_tutar = request.form.get("toplam_tutar")
     siparis_id = request.form.get("siparis_id")
 
-    # URL'leri form'dan al veya varsayılan değerleri kullan
+
     basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/3d-sonuc"
     hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-hata"
 
-    # 3D işlem hash hesapla
+
     islem_hash = calculate_3d_hash(
         CLIENT_CODE,
         GUID,
@@ -477,7 +477,7 @@ def odeme_3d():
 
 @app.route("/3d-sonuc", methods=["POST"])
 def sonuc_3d():
-    # Bankadan gelen parametreleri al
+
     md = request.form.get("md", "")
     mdStatus = request.form.get("mdStatus", "")
     orderId = request.form.get("orderId", "")
@@ -485,7 +485,6 @@ def sonuc_3d():
     islemHash = request.form.get("islemHash", "")
     transaction_amount = request.form.get("transactionAmount", "")
 
-    # Form'dan gelen ek parametreler (bankadan gelmiyorsa session'dan al)
     islem_tutar = transaction_amount.replace(".", "").replace(",", ".") if transaction_amount else ""
     toplam_tutar = islem_tutar  # Aynı değer olacak
     hata_url = request.form.get("hata_url", "")
@@ -501,26 +500,19 @@ def sonuc_3d():
     print(f"Gelen Hash: {islemHash}")
     print(f"Gelen tüm form data: {dict(request.form)}")
 
-    # ÖNEMLİ: 3D başlatmada kullanılan GUID'i kullan, bankadan geleni değil!
-    # Çünkü Param POS 3D başlatmadaki GUID ile işlemi eşleştiriyor
-    current_guid = GUID  # 3D başlatmada kullanılan GUID
+
+    current_guid = GUID
 
     print(f"3D başlatmada kullanılan GUID: {GUID}")
     print(f"Bankadan gelen GUID: {islemGUID}")
     print(f"Finalize için kullanılacak GUID: {current_guid}")
     print(f"GUID uzunluğu: {len(current_guid)}")
 
-    # 3D doğrulama başarılıysa devam et
+
     if mdStatus == "1":
         print("✅ 3D onayı başarılı, ödeme finalize ediliyor...")
 
-        # Param POS dokümantasyonuna göre TP_WMD_Pay sadece bu parametreleri kullanır:
-        # - G (güvenlik nesnesi)
-        # - GUID (36 karakter)
-        # - UCD_MD (bankadan gelen md değeri)
-        # - Islem_GUID (aynı GUID)
-        # - Siparis_ID (order ID)
-        # Hash gerekmez!
+
 
         xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -553,7 +545,7 @@ def sonuc_3d():
         print(f"Status Code: {response.status_code}")
         print(f"Response Text: {response.text}")
 
-        # Boş response kontrolü
+
         if not response.text.strip():
             return render_template("error.html",
                                    sonuc="EMPTY_RESPONSE",
@@ -567,20 +559,20 @@ def sonuc_3d():
                 'ns': 'https://turkpos.com.tr/'
             }
 
-            # Doğru result tag'ini bul - TP_WMD_Pay için
+
             result = root.find(".//ns:TP_WMD_PayResult", ns)
 
             if result is None:
                 return f"<h3>Result Tag Bulunamadı</h3><pre>{response.text}</pre>"
 
-            # Güvenli XML okuma - Param POS response formatına göre
+
             sonuc_tag = result.find("ns:Sonuc", ns)
             sonuc = sonuc_tag.text if sonuc_tag is not None else "0"
 
-            sonuc_str_tag = result.find("ns:Sonuc_Ack", ns)  # Param POS'ta Sonuc_Ack kullanılıyor
+            sonuc_str_tag = result.find("ns:Sonuc_Ack", ns)
             sonuc_str = sonuc_str_tag.text if sonuc_str_tag is not None else "Bilinmeyen hata"
 
-            # Bu alanlar olmayabilir, kontrol et
+
             auth_code_tag = result.find("ns:Bank_AuthCode", ns)
             auth_code = auth_code_tag.text if auth_code_tag is not None else "N/A"
 
@@ -622,18 +614,16 @@ def hata_3d():
 
 
 
-
-# Finalize hash fonksiyonu (Param POS dokümantasyonuna göre düzeltildi)
 def calculate_finalize_hash(islem_guid, md, md_status, order_id, store_key):
     """3D işlem finalize için hash hesaplar - Param POS formatına göre"""
     import hashlib
     import base64
 
-    # Param POS finalize hash formatı: islemGUID + md + mdStatus + orderId + STORE_KEY
+
     raw = islem_guid + md + md_status + order_id + store_key.lower()
     print(f"Finalize Hash Raw String: {raw}")
 
-    # SHA-1 + Base64
+
     sha1_hash = hashlib.sha1(raw.encode('utf-8')).digest()
     hash_result = base64.b64encode(sha1_hash).decode('utf-8')
 
@@ -646,12 +636,12 @@ def provizyon_kapat():
     if request.method == "GET":
         return render_template("provizyon_kapat.html")
 
-    # Formdan gelen veriler
+
     prov_id = request.form.get("prov_id", "").strip()
     guid = request.form.get("guid", "").strip()
     tutar = request.form.get("tutar", "").strip().replace(".", ",")  # Noktayı virgüle çevir
 
-    # Hatalı durumlar
+
     if not guid:
         return render_template("provizyon_error.html", sonuc_str="❌ Hata: GUID alanı boş olamaz!", prov_id=prov_id)
 
@@ -662,7 +652,7 @@ def provizyon_kapat():
 
     siparis_id = request.form.get("siparis_id", "145339").strip()  # Formdan da alınabilir
 
-    # SOAP XML içeriği
+
     xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -711,12 +701,12 @@ def provizyon_kapat():
                            sonuc_str=sonuc_str,
                            dekont_id=dekont_id,
                            prov_id=prov_id_resp,
-                           siparis_id=siparis_id,  # <-- EKLENDİ
-                           tutar=tutar,            # <-- EKLENDİ
-                           sonuc=sonuc,            # <-- EKLENDİ
-                           bank_auth_code="",      # opsiyonel
-                           bank_trans_id="",       # opsiyonel
-                           bank_host_ref="",       # opsiyonel
+                           siparis_id=siparis_id,
+                           tutar=tutar,
+                           sonuc=sonuc,
+                           bank_auth_code="",
+                           bank_trans_id="",
+                           bank_host_ref="",
                            bank_extra="")
         else:
             return render_template("provizyon_error.html",
