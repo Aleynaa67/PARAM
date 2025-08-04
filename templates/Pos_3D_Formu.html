@@ -2,132 +2,511 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Secure Ödeme</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, #4B0082 0%, #2E0854 100%);
-            padding: 30px 20px 50px 20px;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animasyonlu arka plan parçacıkları */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 60px; height: 60px; left: 80%; animation-delay: 2s; }
+        .particle:nth-child(3) { width: 100px; height: 100px; left: 60%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.3; }
         }
 
         .fixed-tag {
             position: fixed;
-            bottom: 50px;
-            left: 10px;
+            bottom: 30px;
+            left: 20px;
             font-weight: bold;
-            font-size: 18px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            background: linear-gradient(180deg, #0099CC 0%, #4B0082 100%);
-            color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+            color: #333;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             user-select: none;
             z-index: 9999;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            height: 100vh;
+            z-index: 10;
+            position: relative;
+        }
+
+        .payment-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .payment-icon {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .payment-icon img {
+            width: 140px;
+            height: auto;
+            filter: brightness(1.2);
+            z-index: 2;
+            position: relative;
+        }
+
+        .visual-text {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .visual-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 300px;
         }
 
         .form-container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 25px 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 20px 20px 0 0;
         }
 
         h2 {
-            font-size: 32px;
-            margin-bottom: 20px;
+            font-size: 28px;
+            margin-bottom: 10px;
             text-align: center;
-            color: #4B0082;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .form-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: #333;
+            font-size: 14px;
         }
 
         input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 10px 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
         }
 
         input[type="text"]:focus, input[type="number"]:focus {
-            border-color: #00BFB3;
+            border-color: #667eea;
             outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .security-info {
+            background: linear-gradient(135deg, #e8f4fd, #d6f2ff);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .security-info h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .security-info p {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .amount-display {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #e1e5e9;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .amount-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .btn-container {
+            margin-top: 20px;
         }
 
         input[type="submit"] {
             width: 100%;
-            background-color: #00BFB3;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 0;
+            padding: 15px 0;
             font-size: 16px;
-            border-radius: 5px;
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 15px;
         }
 
         input[type="submit"]:hover {
-            background-color: #144174;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        input[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 15px 0;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .payment-method {
+            width: 40px;
+            height: 25px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e1e5e9;
+        }
+
+        /* Loading animasyonu */
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive tasarım */
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 20px;
+            }
+
+            .payment-visual {
+                order: 1;
+            }
+
+            .form-container {
+                order: 2;
+                padding: 30px 25px;
+            }
+
+            .payment-icon {
+                width: 150px;
+                height: 150px;
+            }
+
+            .payment-icon img {
+                width: 100px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .visual-text {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
 
+    <div class="fixed-tag">#SeninleDahaFazlası</div>
 
-<div class="fixed-tag">#SeninleDahaFazlası</div>
+    <div class="main-container">
+        <div class="payment-visual">
+            <div class="payment-icon">
+                <img src="https://isube.param.com.tr/static/intro-2.c524ce92.png" alt="Güvenli Ödeme" />
+            </div>
+            <div class="visual-text">Güvenli Ödeme</div>
+            <div class="visual-subtitle">
+                3D Secure teknolojisi ile kartınız maksimum güvenlik altında.
+                Tüm bilgileriniz 256-bit SSL ile şifrelenmektedir.
+            </div>
+        </div>
 
+        <div class="form-container">
+            <h2>3D Secure Ödeme</h2>
+            <p class="form-subtitle">Güvenli ödeme için kart bilgilerinizi giriniz</p>
 
-<div class="form-container">
-    <h2>3D Secure Ödeme</h2>
-    <form method="POST" action="/odeme-3d">
-        <label for="kk_sahibi">Kart Sahibi Adı:</label>
-        <input type="text" id="kk_sahibi" name="kk_sahibi" placeholder="Ad Soyad" required />
+            <form method="POST" action="/odeme-3d" id="paymentForm">
+                <div class="form-group">
+                    <label for="kk_sahibi">Kart Sahibi Adı</label>
+                    <input type="text" id="kk_sahibi" name="kk_sahibi" placeholder="Ad Soyad" required />
+                </div>
 
-        <label for="kk_no">Kart Numarası:</label>
-        <input type="text" id="kk_no" name="kk_no" placeholder="1111 2222 3333 4444" required />
+                <div class="form-group">
+                    <label for="kk_no">Kart Numarası</label>
+                    <input type="text" id="kk_no" name="kk_no" placeholder="1111 2222 3333 4444" maxlength="19" required />
+                </div>
 
-        <label for="kk_sk_ay">Son Kullanma Ay:</label>
-        <input type="text" id="kk_sk_ay" name="kk_sk_ay" placeholder="MM" maxlength="2" required />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="kk_sk_ay">Ay</label>
+                        <input type="text" id="kk_sk_ay" name="kk_sk_ay" placeholder="MM" maxlength="2" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="kk_sk_yil">Yıl</label>
+                        <input type="text" id="kk_sk_yil" name="kk_sk_yil" placeholder="YYYY" maxlength="4" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="kk_cvc">CVC</label>
+                        <input type="text" id="kk_cvc" name="kk_cvc" placeholder="123" maxlength="3" required />
+                    </div>
+                </div>
 
-        <label for="kk_sk_yil">Son Kullanma Yıl:</label>
-        <input type="text" id="kk_sk_yil" name="kk_sk_yil" placeholder="YYYY" maxlength="4" required />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="islem_tutar">İşlem Tutarı</label>
+                        <input type="text" id="islem_tutar" name="islem_tutar" placeholder="100.00" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="toplam_tutar">Toplam Tutar</label>
+                        <input type="text" id="toplam_tutar" name="toplam_tutar" placeholder="100.00" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="taksit">Taksit</label>
+                        <input type="number" id="taksit" name="taksit" value="1" min="1" max="12" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="siparis_id">Sipariş Numarası</label>
+                    <input type="text" id="siparis_id" name="siparis_id" placeholder="Otomatik oluşturulacak" required />
+                </div>
 
-        <label for="kk_cvc">CVC:</label>
-        <input type="text" id="kk_cvc" name="kk_cvc" placeholder="123" maxlength="3" required />
+                <input type="submit" value="Ödemeyi Başlat" id="submitBtn" />
+            </form>
+        </div>
+    </div>
 
-        <label for="taksit">Taksit:</label>
-        <input type="number" id="taksit" name="taksit" value="1" min="1" required />
+    <script>
+        // Sayfa yüklendiğinde scroll'u sıfırla
+        window.onload = function() {
+            window.scrollTo(0, 0);
+            generateOrderId();
+        };
 
-        <label for="islem_tutar">İşlem Tutarı:</label>
-        <input type="text" id="islem_tutar" name="islem_tutar" placeholder="Örn: 100.00" required />
+        // Otomatik sipariş ID oluştur
+        function generateOrderId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            document.getElementById('siparis_id').value = `SP${timestamp}${random}`;
+        }
 
-        <label for="toplam_tutar">Toplam Tutar:</label>
-        <input type="text" id="toplam_tutar" name="toplam_tutar" placeholder="Örn: 100.00" required />
+        // Kart numarası formatla
+        document.getElementById('kk_no').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '');
+            let formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+            e.target.value = formattedValue;
+        });
 
-        <label for="siparis_id">Sipariş ID:</label>
-        <input type="text" id="siparis_id" name="siparis_id" required />
+        // Tutarları güncelle
+        function updateAmount() {
+            const toplamTutar = document.getElementById('toplam_tutar').value;
+            document.getElementById('islem_tutar').value = toplamTutar;
+        }
 
-        <input type="submit" value="Ödemeyi Başlat" />
-    </form>
-</div>
+        document.getElementById('islem_tutar').addEventListener('input', updateAmount);
+        document.getElementById('toplam_tutar').addEventListener('input', updateAmount);
 
+        // Form gönderme animasyonu
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = '<div class="loading"></div>Ödeme İşleniyor...';
+            submitBtn.style.display = 'flex';
+            submitBtn.style.alignItems = 'center';
+            submitBtn.style.justifyContent = 'center';
+            document.querySelector('.loading').style.display = 'block';
+        });
 
-<script>
-    window.onload = function() {
-        window.scrollTo(0, 0);
-    };
-</script>
+        // Sadece rakam girişine izin ver
+        document.getElementById('kk_sk_ay').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
 
+        document.getElementById('kk_sk_yil').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('kk_cvc').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    </script>
 </body>
 </html>

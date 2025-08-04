@@ -639,5 +639,93 @@ def calculate_finalize_hash(islem_guid, md, md_status, order_id, store_key):
 
     print(f"Finalize Hash Result: {hash_result}")
     return hash_result
+
+
+@app.route("/provizyon-kapat", methods=["GET", "POST"])
+def provizyon_kapat():
+    if request.method == "GET":
+        return render_template("provizyon_kapat.html")
+
+    # Formdan gelen veriler
+    prov_id = request.form.get("prov_id", "").strip()
+    guid = request.form.get("guid", "").strip()
+    tutar = request.form.get("tutar", "").strip().replace(".", ",")  # Noktayı virgüle çevir
+
+    # Hatalı durumlar
+    if not guid:
+        return render_template("provizyon_error.html", sonuc_str="❌ Hata: GUID alanı boş olamaz!", prov_id=prov_id)
+
+    if not prov_id and not request.form.get("siparis_id", "").strip():
+        return render_template("provizyon_error.html",
+                               sonuc_str="❌ Hata: Prov_ID veya Siparis_ID alanlarından biri doldurulmalıdır!",
+                               prov_id=prov_id)
+
+    siparis_id = request.form.get("siparis_id", "145339").strip()  # Formdan da alınabilir
+
+    # SOAP XML içeriği
+    xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <TP_Islem_Odeme_OnProv_Kapa xmlns="https://turkpos.com.tr/">
+      <G>
+        <CLIENT_CODE>{CLIENT_CODE}</CLIENT_CODE>
+        <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
+        <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
+      </G>
+      <GUID>{guid}</GUID>
+      <Prov_ID>{prov_id}</Prov_ID>
+      <Prov_Tutar>{tutar}</Prov_Tutar>
+      <Siparis_ID>{siparis_id}</Siparis_ID>
+    </TP_Islem_Odeme_OnProv_Kapa>
+  </soap:Body>
+</soap:Envelope>"""
+
+    headers = {
+        "Content-Type": "text/xml; charset=utf-8",
+        "SOAPAction": "https://turkpos.com.tr/TP_Islem_Odeme_OnProv_Kapa"
+    }
+
+    url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+    response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)
+
+    try:
+        root = ET.fromstring(response.text)
+        ns = {
+            "soap": "http://schemas.xmlsoap.org/soap/envelope/",
+            "ns": "https://turkpos.com.tr/"
+        }
+
+        result = root.find(".//ns:TP_Islem_Odeme_OnProv_KapaResult", ns)
+        sonuc = result.find("ns:Sonuc", ns).text
+        sonuc_str = result.find("ns:Sonuc_Str", ns).text
+        dekont_id = result.find("ns:Dekont_ID", ns)
+        prov_id_resp = result.find("ns:Prov_ID", ns)
+
+        dekont_id = dekont_id.text if dekont_id is not None else ""
+        prov_id_resp = prov_id_resp.text if prov_id_resp is not None else ""
+
+        if sonuc == "1":
+            return render_template("provizyon_success.html",
+                           sonuc_str=sonuc_str,
+                           dekont_id=dekont_id,
+                           prov_id=prov_id_resp,
+                           siparis_id=siparis_id,  # <-- EKLENDİ
+                           tutar=tutar,            # <-- EKLENDİ
+                           sonuc=sonuc,            # <-- EKLENDİ
+                           bank_auth_code="",      # opsiyonel
+                           bank_trans_id="",       # opsiyonel
+                           bank_host_ref="",       # opsiyonel
+                           bank_extra="")
+        else:
+            return render_template("provizyon_error.html",
+                                   sonuc_str=sonuc_str,
+                                   prov_id=prov_id_resp)
+
+    except Exception as e:
+        return f"<h3>Hata:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
+
+
 if __name__ == "__main__":
     app.run(debug=True)

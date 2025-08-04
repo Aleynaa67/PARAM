@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provizyon Kapatma Hatası</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .error-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .error-icon {
+            font-size: 60px;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: #721c24;
+        }
+
+        .error-code {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .error-description {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .details-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .details-section h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .detail-value {
+            color: #6c757d;
+            text-align: right;
+        }
+
+        .help-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .help-section h3 {
+            margin: 0 0 15px 0;
+            color: #856404;
+        }
+
+        .help-section ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #856404;
+        }
+
+        .help-section li {
+            margin-bottom: 5px;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #545b62);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            color: #212529;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .contact-info {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            color: #495057;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-header">
+            <div class="error-icon">❌</div>
+            <h1>Provizyon Kapatma Hatası</h1>
+        </div>
+
+        <div class="error-message">
+            <div class="error-code">Hata Kodu: {{ sonuc }}</div>
+            <div class="error-description">{{ sonuc_str }}</div>
+        </div>
+
+        <div class="help-section">
+            <h3>💡 Olası Çözümler</h3>
+            <ul>
+                <li>Sipariş ID'nin doğru olduğundan emin olun</li>
+                <li>Tutar bilgisinin geçerli olduğunu kontrol edin</li>
+                <li>Provizyonun daha önce kapatılmadığından emin olun</li>
+                <li>İnternet bağlantınızı kontrol edin</li>
+                <li>Birkaç dakika sonra tekrar deneyin</li>
+            </ul>
+        </div>
+
+        <div class="details-section">
+            <h3>Hata Detayları</h3>
+
+            <div class="detail-row">
+                <span class="detail-label">Hata Kodu:</span>
+                <span class="detail-value">{{ sonuc }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Hata Açıklaması:</span>
+                <span class="detail-value">{{ sonuc_str }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Tarih/Saat:</span>
+                <span class="detail-value" id="currentDateTime"></span>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <a href="/provizyon-kapat" class="btn btn-primary">Tekrar Dene</a>
+            <a href="/" class="btn btn-secondary">Ana Menü</a>
+            <a href="/iptal-islem" class="btn btn-warning">İptal/İade</a>
+        </div>
+
+        <div class="contact-info">
+            Sorun devam ederse teknik destek ile iletişime geçin.
+        </div>
+    </div>
+
+    <script>
+        // Mevcut tarih ve saati göster
+        document.getElementById('currentDateTime').textContent = new Date().toLocaleString('tr-TR');
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provizyon Kapatma Başarılı</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .success-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #155724;
+        }
+
+        .details-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .details-section h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .detail-value {
+            color: #6c757d;
+            text-align: right;
+        }
+
+        .amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #545b62);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-header">
+            <div class="success-icon">✅</div>
+            <h1>Provizyon Kapatma Başarılı</h1>
+        </div>
+
+        <div class="success-message">
+            <strong>{{ sonuc_str }}</strong>
+        </div>
+
+        <div class="details-section">
+            <h3>İşlem Detayları</h3>
+
+            <div class="detail-row">
+                <span class="detail-label">Sipariş ID:</span>
+                <span class="detail-value">{{ siparis_id }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Kapatılan Tutar:</span>
+                <span class="detail-value amount">{{ tutar }} TL</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">İşlem Sonucu:</span>
+                <span class="detail-value">{{ sonuc }}</span>
+            </div>
+
+            {% if bank_auth_code %}
+            <div class="detail-row">
+                <span class="detail-label">Banka Yetki Kodu:</span>
+                <span class="detail-value">{{ bank_auth_code }}</span>
+            </div>
+            {% endif %}
+
+            {% if bank_trans_id %}
+            <div class="detail-row">
+                <span class="detail-label">Banka İşlem ID:</span>
+                <span class="detail-value">{{ bank_trans_id }}</span>
+            </div>
+            {% endif %}
+
+            {% if bank_host_ref %}
+            <div class="detail-row">
+                <span class="detail-label">Host Referans:</span>
+                <span class="detail-value">{{ bank_host_ref }}</span>
+            </div>
+            {% endif %}
+
+            {% if bank_extra %}
+            <div class="detail-row">
+                <span class="detail-label">Ek Bilgi:</span>
+                <span class="detail-value">{{ bank_extra }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="buttons">
+            <a href="/provizyon-kapat" class="btn btn-primary">Yeni Provizyon Kapat</a>
+            <a href="/" class="btn btn-secondary">Ana Menü</a>
+        </div>
+    </div>
+
+    <script>
+        // Sayfayı otomatik yazdır (isteğe bağlı)
+        // window.print();
+    </script>
+</body>
+</html>
