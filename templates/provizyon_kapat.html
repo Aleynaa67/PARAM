@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Provizyon Kapatma</title>
+    <title>Provizyon Kapatma - Param</title>
     <style>
         * {
             margin: 0;
@@ -13,499 +13,609 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background:
-                linear-gradient(135deg, rgba(220, 38, 127, 0.1) 0%, rgba(139, 69, 19, 0.1) 50%, rgba(255, 215, 0, 0.1) 100%),
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23dc267f' fill-opacity='0.05'%3E%3Cpath d='M30 0l30 30-30 30L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                linear-gradient(45deg, #f8e8ff 0%, #fff5e6 50%, #fff8dc 100%);
-            background-size: cover, 60px 60px, cover;
+            background: linear-gradient(135deg, #4B0082 0%, #764ba2 100%);
             min-height: 100vh;
+            color: #1e293b;
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Turkish Money Pattern */
-        .money-pattern {
+        /* Enhanced animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 120%;
+            height: 120%;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15) 2px, transparent 2px),
+                radial-gradient(circle at 80% 40%, rgba(20, 184, 166, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 80%, rgba(124, 58, 237, 0.08) 3px, transparent 3px),
+                linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.02) 50%, transparent 60%);
+            background-size: 80px 80px, 120px 120px, 100px 100px, 200px 200px;
+            animation: backgroundMove 20s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        /* Floating geometric shapes */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 85% 15%, rgba(20, 184, 166, 0.15) 100px, transparent 100px),
+                radial-gradient(circle at 15% 85%, rgba(124, 58, 237, 0.15) 150px, transparent 150px),
+                radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.05) 80px, transparent 80px);
+            animation: floatingShapes 25s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-20px, -30px) rotate(1deg); }
+            50% { transform: translate(30px, -20px) rotate(-1deg); }
+            75% { transform: translate(-10px, 20px) rotate(0.5deg); }
+        }
+
+        @keyframes floatingShapes {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(20px, -40px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+        }
+
+        /* Particle effect overlay */
+        .particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.03;
-            background-image:
-                radial-gradient(circle at 20% 20%, #dc267f 2px, transparent 2px),
-                radial-gradient(circle at 60% 80%, #8b4513 2px, transparent 2px),
-                radial-gradient(circle at 80% 40%, #ffd700 2px, transparent 2px);
-            background-size: 100px 100px, 120px 120px, 80px 80px;
-            animation: patternMove 20s linear infinite;
         }
 
-        @keyframes patternMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        /* Floating Money Elements */
-        .money-element {
-            position: fixed;
-            font-size: 40px;
-            opacity: 0.1;
-            animation: floatMoney 15s ease-in-out infinite;
-            z-index: -1;
-            font-weight: bold;
-        }
-
-        .money-element:nth-child(1) {
-            top: 15%;
-            left: 10%;
-            color: #dc267f;
-            animation-delay: 0s;
-        }
-
-        .money-element:nth-child(2) {
-            top: 60%;
-            right: 15%;
-            color: #8b4513;
-            animation-delay: 5s;
-        }
-
-        .money-element:nth-child(3) {
-            bottom: 25%;
-            left: 20%;
-            color: #ffd700;
-            animation-delay: 10s;
-        }
-
-        @keyframes floatMoney {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.1; }
-            50% { transform: translateY(-20px) rotate(10deg); opacity: 0.2; }
-        }
-
-        .container {
-            max-width: 520px;
-            margin: 50px auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 45px 40px;
-            border-radius: 25px;
-            box-shadow:
-                0 25px 50px rgba(220, 38, 127, 0.15),
-                0 0 0 1px rgba(220, 38, 127, 0.1),
-                inset 0 1px 0 rgba(255,255,255,0.8);
-            position: relative;
-            border: 2px solid rgba(220, 38, 127, 0.1);
-        }
-
-        .container::before {
-            content: '';
+        .particle {
             position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            background: linear-gradient(45deg, #dc267f, #8b4513, #ffd700, #dc267f);
-            border-radius: 27px;
-            z-index: -1;
-            opacity: 0.7;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; top: 20%; width: 4px; height: 4px; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 80%; top: 10%; width: 2px; height: 2px; animation-delay: 2s; }
+        .particle:nth-child(3) { left: 60%; top: 70%; width: 3px; height: 3px; animation-delay: 4s; }
+        .particle:nth-child(4) { left: 20%; top: 80%; width: 2px; height: 2px; animation-delay: 6s; }
+        .particle:nth-child(5) { left: 90%; top: 60%; width: 4px; height: 4px; animation-delay: 1s; }
+        .particle:nth-child(6) { left: 30%; top: 30%; width: 2px; height: 2px; animation-delay: 3s; }
+        .particle:nth-child(7) { left: 70%; top: 90%; width: 3px; height: 3px; animation-delay: 5s; }
+        .particle:nth-child(8) { left: 50%; top: 5%; width: 2px; height: 2px; animation-delay: 7s; }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0px) translateX(0px) opacity(0.6); }
+            25% { transform: translateY(-20px) translateX(10px) opacity(1); }
+            50% { transform: translateY(-40px) translateX(-5px) opacity(0.8); }
+            75% { transform: translateY(-20px) translateX(15px) opacity(1); }
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 35px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.1),
+                0 1px 3px rgba(0, 0, 0, 0.05);
             position: relative;
         }
 
-        .header-icon {
-            font-size: 55px;
-            margin-bottom: 18px;
-            display: block;
-            background: linear-gradient(135deg, #dc267f, #8b4513, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 2px 4px rgba(220, 38, 127, 0.3));
-        }
-
-        h1 {
-            color: #4a154b;
-            margin-bottom: 10px;
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            text-shadow: 0 2px 4px rgba(220, 38, 127, 0.1);
-        }
-
-        .subtitle {
-            color: #8b4513;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .info-box {
-            background: linear-gradient(135deg,
-                rgba(220, 38, 127, 0.05) 0%,
-                rgba(139, 69, 19, 0.05) 50%,
-                rgba(255, 215, 0, 0.05) 100%);
-            border: 2px solid rgba(220, 38, 127, 0.2);
-            border-radius: 18px;
-            padding: 25px;
-            margin-bottom: 35px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .info-box::before {
+        .header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #dc267f, #8b4513, #ffd700);
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent);
         }
 
-        .info-box h3 {
-            margin: 0 0 15px 0;
-            color: #4a154b;
-            font-size: 18px;
-            font-weight: 700;
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
             display: flex;
             align-items: center;
         }
 
-        .info-icon {
-            margin-right: 12px;
-            font-size: 22px;
-            background: linear-gradient(135deg, #dc267f, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #7c3aed;
+            text-decoration: none;
+            position: relative;
         }
 
-        .info-box p {
-            margin: 0;
-            color: #5d4037;
-            font-size: 15px;
-            line-height: 1.6;
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #7c3aed, #14b8a6);
+            transition: width 0.3s ease;
+        }
+
+        .logo:hover::after {
+            width: 100%;
+        }
+
+        .main-container {
+            max-width: 400px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        .form-card {
+            background: linear-gradient(145deg, rgba(0, 191, 179, 0.95), rgba(51, 204, 194, 0.95), rgba(102, 217, 209, 0.95), rgba(153, 230, 224, 0.95));
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow:
+                0 25px 50px rgba(124, 58, 237, 0.2),
+                0 15px 30px rgba(20, 184, 166, 0.15),
+                0 5px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        }
+
+        .form-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            animation: cardGlow 6s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes cardGlow {
+            0%, 100% { transform: rotate(0deg); opacity: 0.5; }
+            50% { transform: rotate(180deg); opacity: 0.8; }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #7c3aed 0%, #14b8a6 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 32px;
+            box-shadow:
+                0 10px 25px rgba(124, 58, 237, 0.4),
+                0 5px 10px rgba(20, 184, 166, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .form-icon::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #7c3aed, #14b8a6, #7c3aed);
+            border-radius: 22px;
+            z-index: -1;
+            animation: borderRotate 4s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .form-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .info-notice {
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(219, 234, 254, 0.95));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(191, 219, 254, 0.6);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .info-icon {
+            color: #2563eb;
+            font-size: 1.125rem;
+            margin-top: 0.125rem;
+            flex-shrink: 0;
+            animation: infoGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes infoGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .info-text {
+            color: #1e293b;
+            font-size: 0.875rem;
+            line-height: 1.5;
             font-weight: 500;
         }
 
         .form-group {
-            margin-bottom: 30px;
-            position: relative;
+            margin-bottom: 1.5rem;
         }
 
-        label {
+        .form-label {
             display: block;
-            margin-bottom: 12px;
-            font-weight: 700;
-            color: #4a154b;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-        }
-
-        .label-icon {
-            margin-right: 12px;
-            font-size: 20px;
-            background: linear-gradient(135deg, #dc267f, #8b4513, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 18px 24px;
-            border: 3px solid rgba(220, 38, 127, 0.2);
-            border-radius: 15px;
-            font-size: 16px;
+            font-size: 0.875rem;
             font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
-            color: #4a154b;
-            position: relative;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #dc267f;
-            box-shadow:
-                0 0 0 4px rgba(220, 38, 127, 0.1),
-                0 8px 25px rgba(220, 38, 127, 0.15);
-            transform: translateY(-2px);
-            background: #ffffff;
-        }
-
-        input::placeholder {
-            color: rgba(139, 69, 19, 0.6);
+            color: #1e293b;
             font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        .btn-container {
-            text-align: center;
-            margin-top: 40px;
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow:
+                0 0 0 3px rgba(37, 99, 235, 0.1),
+                0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
         }
 
-        .btn {
-            background: linear-gradient(135deg, #dc267f 0%, #8b4513 50%, #ffd700 100%);
+        .form-input::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #008b00 0%, #00a000 100%);
             color: #ffffff;
-            padding: 20px 50px;
             border: none;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 800;
+            padding: 1rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             box-shadow:
-                0 15px 35px rgba(220, 38, 127, 0.3),
-                0 5px 15px rgba(139, 69, 19, 0.2);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                0 6px 20px rgba(0, 139, 0, 0.3),
+                0 2px 6px rgba(0, 139, 0, 0.2);
         }
 
-        .btn::before {
+        .submit-btn::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.6s ease;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
         }
 
-        .btn:hover::before {
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 25px rgba(0, 139, 0, 0.4),
+                0 4px 12px rgba(0, 139, 0, 0.25);
+        }
+
+        .submit-btn:hover::before {
             left: 100%;
         }
 
-        .btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow:
-                0 20px 45px rgba(220, 38, 127, 0.4),
-                0 8px 25px rgba(139, 69, 19, 0.3);
+        .submit-btn:active {
+            transform: translateY(0);
         }
 
-        .btn:active {
-            transform: translateY(-1px);
+        .submit-btn.loading {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         .back-link {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 1.5rem;
         }
 
         .back-link a {
-            color: #8b4513;
+            color: #64748b;
             text-decoration: none;
-            font-weight: 600;
+            font-size: 0.875rem;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            padding: 12px 25px;
-            border-radius: 30px;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
             transition: all 0.3s ease;
-            border: 2px solid rgba(139, 69, 19, 0.2);
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .back-link a:hover {
-            background: rgba(220, 38, 127, 0.1);
-            color: #dc267f;
-            transform: translateX(-5px);
-            border-color: rgba(220, 38, 127, 0.3);
+            color: #2563eb;
+            background: rgba(75, 0, 130, 0.8);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(75, 0, 130, 0.3);
         }
 
-        .back-icon {
-            margin-right: 10px;
-            font-size: 18px;
-            font-weight: bold;
+        .required {
+            color: #dc2626;
         }
 
-        /* Turkish Lira Symbol */
-        .currency-symbol {
-            position: fixed;
-            font-size: 120px;
-            color: rgba(220, 38, 127, 0.03);
-            z-index: -1;
-            font-weight: 900;
-        }
-
-        .currency-symbol:nth-child(1) {
-            top: 10%;
-            right: 10%;
-            transform: rotate(15deg);
-        }
-
-        .currency-symbol:nth-child(2) {
-            bottom: 15%;
-            left: 5%;
-            transform: rotate(-20deg);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                margin: 25px 15px;
-                padding: 35px 25px;
+        /* Responsive */
+        @media (max-width: 640px) {
+            .main-container {
+                margin: 2rem auto;
+                padding: 0 1rem;
             }
 
-            .money-element, .currency-symbol {
-                display: none;
+            .form-card {
+                padding: 1.5rem;
+                border-radius: 20px;
             }
 
-            h1 {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .form-icon {
+                width: 60px;
+                height: 60px;
                 font-size: 28px;
             }
         }
 
-        /* Loading Animation */
-        .btn.loading {
-            pointer-events: none;
-            opacity: 0.8;
+        /* Input validation states */
+        .form-input:invalid:not(:placeholder-shown) {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
 
-        .btn.loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            margin: auto;
-            border: 3px solid transparent;
-            border-top-color: #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .form-input:valid:not(:placeholder-shown) {
+            border-color: #059669;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Focus states */
+        .submit-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 139, 0, 0.2);
         }
 
-        /* Money Rain Effect */
-        .money-rain {
-            position: fixed;
-            top: -10px;
-            font-size: 24px;
-            animation: fall 8s linear infinite;
-            z-index: -1;
-            opacity: 0.1;
+        .back-link a:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
         }
-
-        @keyframes fall {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.1; }
-            90% { opacity: 0.1; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-        }
-
-        .money-rain:nth-child(odd) { color: #dc267f; }
-        .money-rain:nth-child(even) { color: #8b4513; }
     </style>
 </head>
 <body>
-    <div class="money-pattern"></div>
-    <div class="money-element">₺</div>
-    <div class="money-element">💰</div>
-    <div class="money-element">₺</div>
-    <div class="currency-symbol">₺</div>
-    <div class="currency-symbol">₺</div>
+    <!-- Floating particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
 
-    <div class="container">
-        <div class="header">
-            <span class="header-icon"></span>
-            <h1>Provizyon Kapatma</h1>
-            <p class="subtitle">Güvenli Para İşlemi</p>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">param</a>
         </div>
+    </header>
 
-        <div class="info-box">
-            <h3><span class="info-icon">💎</span>Önemli Bilgilendirme</h3>
-            <p>Provizyon kapatma işlemi ile daha önce bloke edilen tutarı serbest bırakabilirsiniz. Bu işlem bankacılık güvenlik standartlarında gerçekleşir ve geri alınamaz.</p>
-        </div>
-
-        <form method="post" action="/provizyon-kapat" id="provisionForm">
-            <div class="form-group">
-                <label for="siparis_id">
-                    <span class="label-icon">🏷️</span>
-                    Sipariş Numarası *
-                </label>
-                <input type="text" id="siparis_id" name="siparis_id" required
-                       placeholder="Örn: 123456789">
+    <div class="main-container">
+        <div class="form-card">
+            <div class="form-header">
+                <div class="form-icon">💳</div>
+                <h1 class="form-title">Provizyon Kapatma</h1>
+                <p class="form-subtitle">Bloke edilen tutarı serbest bırakın</p>
             </div>
 
-            <div class="form-group">
-                <label for="tutar">
-                    <span class="label-icon">💰</span>
-                    Tutar (Türk Lirası) *
-                </label>
-                <input type="number" id="tutar" name="tutar" step="0.01" min="0.01" required
-                       placeholder="Örn: 1.000,00 ₺">
+            <div class="info-notice">
+                <span class="info-icon">ℹ️</span>
+                <p class="info-text">
+                    Bu işlem ile daha önce bloke edilen tutar serbest bırakılacaktır.
+                    İşlem tamamlandıktan sonra geri alınamaz.
+                </p>
             </div>
 
-            <div class="form-group">
-                <label for="guid">
-                    <span class="label-icon">🔐</span>
-                    Güvenlik Kodu (GUID) *
-                </label>
-                <input type="text" id="guid" name="guid" required
-                       placeholder="Örn: 0c13d406-873b-403b-9c09-a5766840d98c">
-            </div>
+            <form method="post" action="/provizyon-kapat" id="provisionForm">
+                <div class="form-group">
+                    <label for="siparis_id" class="form-label">
+                        Sipariş Numarası <span class="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="siparis_id"
+                        name="siparis_id"
+                        class="form-input"
+                        required
+                        placeholder="Sipariş numaranızı girin"
+                        autocomplete="off"
+                    >
+                </div>
 
-            <div class="btn-container">
-                <button type="submit" class="btn" id="submitBtn">
+                <div class="form-group">
+                    <label for="tutar" class="form-label">
+                        Tutar (₺) <span class="required">*</span>
+                    </label>
+                    <input
+                        type="number"
+                        id="tutar"
+                        name="tutar"
+                        class="form-input"
+                        step="0.01"
+                        min="0.01"
+                        required
+                        placeholder="0.00"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="guid" class="form-label">
+                        Güvenlik Kodu <span class="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="guid"
+                        name="guid"
+                        class="form-input"
+                        required
+                        placeholder="GUID kodunu girin"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
                     Provizyonu Kapat
                 </button>
-            </div>
-        </form>
+            </form>
 
-        <div class="back-link">
-            <a href="/">
-                <span class="back-icon">← </span>
-                Ana Menüye Dön
-            </a>
+            <div class="back-link">
+                <a href="/">
+                    ← Ana Sayfaya Dön
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
-        // Create money rain effect
-        function createMoneyRain() {
-            const symbols = ['₺', '💰', '💎', '🏦'];
-            setInterval(() => {
-                if (Math.random() > 0.7) {
-                    const money = document.createElement('div');
-                    money.className = 'money-rain';
-                    money.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                    money.style.left = Math.random() * 100 + '%';
-                    money.style.animationDuration = (Math.random() * 3 + 5) + 's';
-                    document.body.appendChild(money);
-
-                    setTimeout(() => money.remove(), 8000);
-                }
-            }, 1000);
-        }
-
-        createMoneyRain();
-
-        // Form submission animation
         document.getElementById('provisionForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.classList.add('loading');
-            submitBtn.innerHTML = '💳 İşleniyor...';
+            submitBtn.textContent = 'İşleniyor...';
+            submitBtn.disabled = true;
         });
 
-        // Input focus animations
-        const inputs = document.querySelectorAll('input');
+        // Format amount input
+        const tutarInput = document.getElementById('tutar');
+        tutarInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            if (value && !isNaN(value)) {
+                e.target.style.textAlign = 'right';
+            }
+        });
+
+        // Auto-format GUID input
+        const guidInput = document.getElementById('guid');
+        guidInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^a-fA-F0-9-]/g, '');
+            e.target.value = value;
+        });
+
+        // Enhanced input validation
+        const inputs = document.querySelectorAll('.form-input');
         inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.parentElement.style.transform = 'scale(1.02)';
+            input.addEventListener('blur', function() {
+                if (this.value.trim() && this.checkValidity()) {
+                    this.style.borderColor = '#059669';
+                } else if (this.value.trim() && !this.checkValidity()) {
+                    this.style.borderColor = '#dc2626';
+                }
             });
 
-            input.addEventListener('blur', function() {
-                this.style.transform = 'translateY(0)';
-                this.parentElement.style.transform = 'scale(1)';
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#2563eb';
             });
         });
     </script>
