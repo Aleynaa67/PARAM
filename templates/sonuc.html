@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>İşlem Sorgulama Sonucu</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f8fa;
+            color: #333;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #00bfb3;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        td.label {
+            font-weight: bold;
+            color: #555;
+            width: 40%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #00bfb3;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>İşlem Sorgulama Sonucu</h1>
+    <table>
+        <tr><td class="label">Durum:</td><td>{{ bilgiler['Durum'] }}</td></tr>
+        <tr><td class="label">Açıklama:</td><td>{{ bilgiler['Odeme_Sonuc_Aciklama'] }}</td></tr>
+        <tr><td class="label">Tarih:</td><td>{{ bilgiler['Tarih'] }}</td></tr>
+        <tr><td class="label">Dekont ID:</td><td>{{ bilgiler['Dekont_ID'] }}</td></tr>
+        <tr><td class="label">Sipariş ID:</td><td>{{ bilgiler['Siparis_ID'] }}</td></tr>
+        <tr><td class="label">Kredi Kartı:</td><td>{{ bilgiler['KK_No'] }}</td></tr>
+        <tr><td class="label">Toplam Tutar:</td><td>{{ bilgiler['Toplam_Tutar'] }} TL</td></tr>
+        <tr><td class="label">Komisyon:</td><td>{{ bilgiler['Komisyon_Tutar'] }} TL</td></tr>
+        <tr><td class="label">Taksit:</td><td>{{ bilgiler['Taksit'] }}</td></tr>
+
+    </table>
+
+    <a href="{{ url_for('islem_sorgula_form') }}" class="back-link">← Geri dön</a>
+</div>
+</body>
+</html>
+</html>

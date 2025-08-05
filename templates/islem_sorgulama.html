@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İşlem Sorgulama - Param POS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            animation: backgroundShift 15s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            33% { transform: translateX(-20px) translateY(-20px); }
+            66% { transform: translateX(20px) translateY(-10px); }
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: containerFadeIn 1s ease-out;
+        }
+
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #4a5568;
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            animation: alertSlide 0.5s ease-out;
+        }
+
+        @keyframes alertSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            animation: formGroupFade 1s ease-out both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.2s; }
+        .form-group:nth-child(2) { animation-delay: 0.4s; }
+        .form-group:nth-child(3) { animation-delay: 0.6s; }
+        .form-group:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes formGroupFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow:
+                0 0 0 3px rgba(102, 126, 234, 0.1),
+                0 4px 15px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+            background: #ffffff;
+        }
+
+        input::placeholder {
+            color: rgba(74, 85, 104, 0.6);
+            font-weight: 400;
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+            animation: buttonFade 1s ease-out 1s both;
+        }
+
+        @keyframes buttonFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow:
+                0 10px 20px rgba(102, 126, 234, 0.3),
+                0 3px 10px rgba(118, 75, 162, 0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow:
+                0 15px 30px rgba(102, 126, 234, 0.4),
+                0 5px 15px rgba(118, 75, 162, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0px);
+        }
+
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .api-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .api-info strong {
+            color: #2d3748;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 25px 20px;
+                max-width: 90%;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .btn {
+                padding: 12px 32px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="header-icon">🔍</span>
+            <h1>İşlem Sorgulama</h1>
+            <p class="subtitle">Param POS İşlem Detayları</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="api-info">
+            <strong>💡 Bilgi:</strong> İşlem sorgulama için en az bir arama kriteri girmelisiniz.
+            GUID, Dekont ID, Sipariş ID veya İşlem ID kullanarak işlem detaylarını görüntüleyebilirsiniz.
+        </div>
+
+        <form method="post" action="/islem-sorgula" id="sorgulamaForm">
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="section-icon">🎯</span>
+                    Arama Kriterleri
+                </div>
+
+                <div class="form-group">
+                    <label for="guid">Güvenlik Kodu (GUID)</label>
+                    <input type="text" id="guid" name="guid"
+                           placeholder="Örn: 0c13d406-873b-403b-9c09-a5766840d98c">
+                    <div class="form-help">Benzersiz işlem tanımlayıcısı</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dekont_id">Dekont ID</label>
+                    <input type="text" id="dekont_id" name="dekont_id"
+                           placeholder="Örn: 3000159388">
+                    <div class="form-help">İşlem makbuz numarası</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="siparis_id">Sipariş ID</label>
+                    <input type="text" id="siparis_id" name="siparis_id"
+                           placeholder="Örn: 107382010210950422742">
+                    <div class="form-help">Sipariş numarası</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="islem_id">İşlem ID</label>
+                    <input type="text" id="islem_id" name="islem_id"
+                           placeholder="Örn: 6004466196">
+                    <div class="form-help">Sistem işlem numarası</div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn" id="submitBtn">
+                    🔍 İşlem Sorgula
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Form submit animasyonu
+        document.getElementById('sorgulamaForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+
+            // En az bir alan dolu mu kontrol et
+            const guid = document.getElementById('guid').value.trim();
+            const dekont_id = document.getElementById('dekont_id').value.trim();
+            const siparis_id = document.getElementById('siparis_id').value.trim();
+            const islem_id = document.getElementById('islem_id').value.trim();
+
+            if (!guid && !dekont_id && !siparis_id && !islem_id) {
+                e.preventDefault();
+                alert('En az bir arama kriteri girmelisiniz!');
+                return;
+            }
+
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '⏳ Sorgulanıyor...';
+        });
+
+        // Input focus animasyonları
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.01)';
+                this.parentElement.style.transition = 'transform 0.3s ease';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Test verisi doldur (geliştirme için)
+        if (window.location.search.includes('test=1')) {
+            document.getElementById('guid').value = '0c13d406-873b-403b-9c09-a5766840d98c';
+            document.getElementById('dekont_id').value = '3000159388';
+        }
+    </script>
+</body>
+</html>

@@ -717,5 +717,221 @@ def provizyon_kapat():
         return f"<h3>Hata:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
 
-if __name__ == "__main__":
+
+
+
+
+
+
+
+from flask import Flask, render_template, request, flash, redirect, url_for
+import requests
+import xml.etree.ElementTree as ET
+import logging
+app.secret_key = "computerengineering"
+
+
+BASE_URL = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+@app.route('/')
+def index():
+    return render_template('menu.html')
+
+# Form sayfasını açar
+@app.route('/islem-sorgula', methods=['GET'])
+def islem_sorgula_form():
+    return render_template('islem_sorgulama.html')
+
+
+import xml.etree.ElementTree as ET
+import requests
+from flask import request, render_template, flash
+
+
+@app.route('/islem-sorgula', methods=['POST'])
+def islem_sorgula():
+    guid = request.form.get('guid', '').strip()
+    dekont_id = request.form.get('dekont_id', '').strip()
+    siparis_id = request.form.get('siparis_id', '').strip()
+    islem_id = request.form.get('islem_id', '').strip()
+
+    if not any([guid, dekont_id, siparis_id, islem_id]):
+        flash("En az bir arama kriteri giriniz", "error")
+        return render_template('islem_sorgulama.html')
+
+    # XML SOAP isteği
+    xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <TP_Islem_Sorgulama4 xmlns="https://turkpos.com.tr/">
+      <G>
+        <CLIENT_CODE>10738</CLIENT_CODE>
+        <CLIENT_USERNAME>Test</CLIENT_USERNAME>
+        <CLIENT_PASSWORD>Test</CLIENT_PASSWORD>
+      </G>
+      <GUID>{guid}</GUID>
+      <Dekont_ID>{dekont_id}</Dekont_ID>
+      <Siparis_ID>{siparis_id}</Siparis_ID>
+      <Islem_ID>{islem_id}</Islem_ID>
+    </TP_Islem_Sorgulama4>
+  </soap:Body>
+</soap:Envelope>"""
+
+    headers = {
+        "Content-Type": "text/xml; charset=utf-8",
+        "SOAPAction": "https://turkpos.com.tr/TP_Islem_Sorgulama4"
+    }
+
+    try:
+        response = requests.post(
+            "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx",
+            data=xml.encode("utf-8"),
+            headers=headers,
+            timeout=30
+        )
+
+        if response.status_code != 200:
+            flash("SOAP bağlantı hatası", "error")
+            return render_template('islem_sorgulama.html')
+
+        # Debug için XML yanıtını logla
+        print("SOAP Response:")
+        print(response.text)
+        print("-" * 50)
+
+        # XML yanıtını parse et
+        bilgiler = parse_soap_response(response.text)
+
+        if bilgiler is None:
+            flash("XML yanıtı işlenirken hata oluştu", "error")
+            return render_template('islem_sorgulama.html')
+
+        return render_template('sonuc.html', bilgiler=bilgiler)
+
+    except Exception as e:
+        flash(f"Hata oluştu: {str(e)}", "error")
+        return render_template('islem_sorgulama.html')
+
+
+def parse_soap_response(xml_response):
+    """SOAP XML yanıtını parse eder ve bilgileri döndürür"""
+    try:
+        print("XML Response içeriği:")
+        print(xml_response)
+        print("-" * 50)
+
+        root = ET.fromstring(xml_response)
+        print("XML Root tag:", root.tag)
+
+        # Tüm elementleri listele
+        print("Tüm XML elementleri:")
+        for elem in root.iter():
+            if elem.text and elem.text.strip():
+                print(f"Tag: {elem.tag}, Text: {elem.text.strip()}")
+        print("-" * 50)
+
+        # SOAP Body içindeki response'u bul
+        # Farklı namespace kombinasyonlarını dene
+        possible_paths = [
+            './/TP_Islem_Sorgulama4Response',
+            './/TP_Islem_Sorgulama4Result',
+            './/{https://turkpos.com.tr/}TP_Islem_Sorgulama4Response',
+            './/{https://turkpos.com.tr/}TP_Islem_Sorgulama4Result',
+            './/Response',
+            './/Result'
+        ]
+
+        response_element = None
+        for path in possible_paths:
+            response_element = root.find(path)
+            if response_element is not None:
+                print(f"Response element bulundu: {path}")
+                break
+
+        if response_element is None:
+            print("Response element bulunamadı!")
+            # Body içindeki ilk elementi al
+            body = root.find('.//{http://schemas.xmlsoap.org/soap/envelope/}Body')
+            if body is not None:
+                response_element = body[0] if len(body) > 0 else None
+                print(
+                    f"Body'nin ilk elementi alındı: {response_element.tag if response_element is not None else 'None'}")
+
+        if response_element is None:
+            return None
+
+        # Bilgileri çıkar
+        bilgiler = {}
+
+        # Response element içindeki tüm child elementleri kontrol et
+        print("Response element içindeki elementler:")
+        for child in response_element:
+            print(f"Child tag: {child.tag}, Text: {child.text}")
+
+        # XML yapısına göre field'ları map et
+        field_mapping = {
+            'Durum': ['Durum', 'Status', 'Sonuc_Kodu'],
+            'Odeme_Sonuc_Aciklama': ['Odeme_Sonuc_Aciklama', 'Aciklama', 'Description', 'Sonuc_Ack'],
+            'Tarih': ['Tarih', 'Islem_Tarih', 'Date', 'Transaction_Date'],
+            'Dekont_ID': ['Dekont_ID', 'DekonID', 'Dekont_No'],
+            'Siparis_ID': ['Siparis_ID', 'SiparisID', 'Order_ID'],
+            'Islem_Tipi': ['Islem_Tipi', 'IslemTipi', 'Transaction_Type'],
+            'KK_No': ['KK_No', 'Kart_No', 'CardNo', 'Card_Number'],
+            'Toplam_Tutar': ['Toplam_Tutar', 'Tutar', 'Amount', 'Total_Amount'],
+            'Komisyon_Tutar': ['Komisyon_Tutar', 'Komisyon', 'Commission'],
+            'Taksit': ['Taksit', 'TaksitSayisi', 'Installment'],
+            'Odeme_Yapan_GSM': ['Odeme_Yapan_GSM', 'GSM', 'Telefon', 'Phone'],
+            'Islem_GUID': ['Islem_GUID', 'GUID', 'Transaction_GUID']
+        }
+
+        for key, possible_fields in field_mapping.items():
+            value = None
+            for field in possible_fields:
+                # Önce direkt arama
+                element = response_element.find(f'.//{field}')
+                if element is None:
+                    # Büyük/küçük harf duyarsız arama
+                    for elem in response_element.iter():
+                        if elem.tag.lower().endswith(field.lower()):
+                            element = elem
+                            break
+
+                if element is not None and element.text:
+                    value = element.text.strip()
+                    print(f"{key} için {field} bulundu: {value}")
+                    break
+
+            bilgiler[key] = value or 'Bilgi bulunamadı'
+
+        return bilgiler
+
+    except ET.ParseError as e:
+        print(f"XML Parse Error: {e}")
+        return None
+    except Exception as e:
+        print(f"Parse Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+
+
+
+if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
