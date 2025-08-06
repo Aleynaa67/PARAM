@@ -917,8 +917,6 @@ def parse_soap_response(xml_response):
 
 
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)
 

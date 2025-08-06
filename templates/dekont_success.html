@@ -1,196 +1,182 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ödeme başarılı!</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ödeme Başarılı!</title>
 
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(#4B0082, #4B0082);
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      flex-direction: column;
-    }
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
 
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle, white 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: moveBackground 20s linear infinite;
-      opacity: 0.2;
-      z-index: 0;
-    }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #5C743B;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #1f2937;
+  }
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  box-shadow: 0 0 6px white;
+  animation: twinkle 2s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 0;
+}
 
-    @keyframes moveBackground {
-      from { background-position: 0 0; }
-      to { background-position: 100px 100px; }
-    }
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.2;
+    box-shadow: 0 0 3px white;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 8px white;
+  }
+}
 
+  .container {
+    background-color: #FFE9E3;
+    max-width: 400px;
+    width: 90%;
+    padding: 40px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .success-icon {
+    font-size: 68px;
+    color: #800000;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: 1.8rem;
+    margin-bottom: 24px;
+    color: #1e293b;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px 0;
+    text-align: left;
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  li {
+    margin-bottom: 10px;
+  }
+
+  li strong {
+    color: #334155;
+  }
+
+  #back-home {
+    padding: 12px 24px;
+    background-color: #41522A;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    transition: background-color 0.3s ease;
+  }
+
+  #back-home:hover {
+    background-color: #5c743b;
+    box-shadow: 0 6px 14px rgba(30, 64, 175, 0.4);
+  }
+
+  #param-hashtag {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: #263019;
+    user-select: none;
+    cursor: default;
+  }
+
+  @media (max-width: 500px) {
     .container {
-      background: #e8d8ff;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
-      max-width: 600px;
-      width: 80%;
-      text-align: center;
-      position: relative;
-      z-index: 1;
+      padding: 30px 20px;
     }
-
-    .success-icon {
-      font-size: 60px;
-      color: #008000;
-      margin-bottom: 20px;
-    }
-
     h2 {
-      color: #4B0082;
-      margin-bottom: 20px;
+      font-size: 1.5rem;
     }
-
     ul {
-      list-style: none;
-      padding: 0;
-      text-align: left;
-      font-size: 1.1rem;
-      color: #333;
-      line-height: 1.8;
+      font-size: 0.9rem;
     }
-
-    li {
-      margin-bottom: 10px;
-    }
-
-    li strong {
-      color: black;
-    }
-
-    .emoji {
-      margin-right: 8px;
-    }
-
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      filter: drop-shadow(0 0 6px white);
-      animation: twinkle 3s infinite ease-in-out;
-      opacity: 0.6;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 4px white); }
-      50% { opacity: 1; filter: drop-shadow(0 0 12px white); }
-    }
-
     #back-home {
-      margin-top: 30px;
-      padding: 12px 24px;
-      background: #30D5C8;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 10px #30D5C8;
-      transition: background 0.3s ease;
-      position: relative;
-      z-index: 1;
+      font-size: 0.95rem;
+      padding: 10px 20px;
     }
-
-    #back-home:hover {
-      background: #26b3a8;
-      box-shadow: 0 0 15px #26b3a8;
-    }
-
-    #param-hashtag {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
-      user-select: none;
-      z-index: 9999;
-      text-shadow: 0 0 8px rgba(0,0,0,0.7);
-      cursor: default;
-    }
-
-    @media (max-width: 500px) {
-      .container {
-        padding: 20px;
-      }
-
-      #param-hashtag {
-        font-size: 2rem;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="success-icon">✅</div>
-    <h2>Ödeme Başarılı!</h2>
-    <ul>
-      <li><strong>İşlem ID:</strong> {{ islem_id }}</li>
-      <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
-      <li><strong>Ödeme Tutarı:</strong> {{ islem_tutar }} TL</li>
-      <li><strong>Tarih:</strong> {{ tarih }}</li>
-      <li><strong>Durum:</strong> Başarılı</li>
-    </ul>
 
-    <button id="back-home">Anasayfaya Dön</button>
-  </div>
+<div class="container">
+  <div class="success-icon" aria-label="Başarılı">✔</div>
+  <h2>Ödeme Başarılı!</h2>
+  <ul>
+    <li><strong>İşlem ID:</strong> {{ islem_id }}</li>
+    <li><strong>Sipariş ID:</strong> {{ siparis_id }}</li>
+    <li><strong>Ödeme Tutarı:</strong> {{ islem_tutar }} TL</li>
+    <li><strong>Tarih:</strong> {{ tarih }}</li>
+    <li><strong>Durum:</strong> Başarılı</li>
+  </ul>
 
-  <script>
-    const starCount = 60;
-    const body = document.body;
+  <button id="back-home">Anasayfaya Dön</button>
+</div>
 
-    for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
+<script>
+  document.getElementById('back-home').onclick = () => {
+    window.location.href = '/';
+  };
+</script>
+<script>
+  const starCount = 80; // Yıldız sayısı
+  const body = document.body;
 
-      const size = Math.random() * 3 + 1;
-      star.style.width = size + 'px';
-      star.style.height = size + 'px';
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
 
-      const padding = 5;
-      star.style.top = (Math.random() * (window.innerHeight - padding * 2) + padding) + 'px';
-      star.style.left = (Math.random() * (window.innerWidth - padding * 2) + padding) + 'px';
+    // Rastgele konum
+    star.style.top = Math.random() * 100 + '%';
+    star.style.left = Math.random() * 100 + '%';
 
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      star.style.animationDelay = (Math.random() * 5) + 's';
+    // Rastgele boyut (2-4px)
+    const size = Math.random() * 2 + 2;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
 
-      body.appendChild(star);
-    }
+    // Rastgele animasyon süresi ve gecikmesi
+    star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    star.style.animationDelay = (Math.random() * 5) + 's';
 
-    document.getElementById('back-home').onclick = function () {
-      window.location.href = '/';
-    };
-  </script>
-  <form action="/dekont-indir" method="POST">
-  <input type="hidden" name="islem_id" value="{{ islem_id }}">
-  <input type="hidden" name="bank_trans_id" value="{{ bank_trans_id }}">
-  <input type="hidden" name="bank_auth_code" value="{{ bank_auth_code }}">
-  <input type="hidden" name="siparis_id" value="{{ siparis_id }}">
-  <input type="hidden" name="toplam_tutar" value="{{ islem_tutar }}">
+    body.appendChild(star);
+  }
+</script>
 
-</form>
+<div id="param-hashtag">#ParamİleGüvende</div>
 
-
-  <div id="param-hashtag">#ParamİleGüvende</div>
 </body>
 </html>
