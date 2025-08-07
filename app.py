@@ -35,7 +35,8 @@ def calculate_3d_hash(client_code, guid, islem_tutar, toplam_tutar, siparis_id, 
     return hash_result
 
 
-# Ödeme isteği
+#Kullanıcının girdiği kredi kartı bilgilerini ve ödeme detaylarını alıp,
+#TurkPOS (Param POS altyapısı) sistemine bir SOAP isteği (XML formatında) gönderir.
 def send_pos_request(client_code, guid, siparis_id, taksit, islem_tutar, toplam_tutar,
                      kk_sahibi, kk_no, kk_sk_ay, kk_sk_yil, kk_cvc):
     islem_hash = calculate_islem_hash(client_code, guid, taksit, islem_tutar, toplam_tutar, siparis_id)
@@ -85,7 +86,8 @@ def send_pos_request(client_code, guid, siparis_id, taksit, islem_tutar, toplam_
     return response.text, response.status_code
 
 
-# İptal/iade isteği
+#Daha önce yapılmış bir kredi kartı işlemini iptal etmek ya da iade etmek.
+#TurkPOS (ParamPOS) sistemine SOAP formatında XML göndererek bu işlemi başlatıyor.
 def send_cancel_or_refund_request(siparis_id, tutar, durum="IADE"):
     xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -120,7 +122,8 @@ def send_cancel_or_refund_request(siparis_id, tutar, durum="IADE"):
 def menu():
     return render_template("menu.html")
 
-
+#@app.route(...), bir web sayfası URL'sini belirli bir Python fonksiyonuna bağlar.
+#Bu fonksiyon, kredi kartı ödeme formunu gösterir ve form gönderildikten sonra ödeme işlemini başlatır.
 @app.route("/pay", methods=["GET", "POST"])
 def pay():
     if request.method == "GET":
@@ -916,10 +919,74 @@ def parse_soap_response(xml_response):
         return None
 
 
+@app.route("/kart-ekle", methods=["GET", "POST"])
+def kart_ekle():
+    if request.method == "GET":
+        return render_template("kart_ekle_form.html")
+
+    # Formdan gelen veriler
+    kk_sahibi = request.form.get("kk_sahibi")
+    kk_no = request.form.get("kk_no")
+    kk_sk_ay = request.form.get("kk_sk_ay")
+    kk_sk_yil = request.form.get("kk_sk_yil")
+    kk_kart_adi = request.form.get("kk_kart_adi", "")
+    kk_islem_id = request.form.get("kk_islem_id", "")
+
+    xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+      <soap:Body>
+        <KS_Kart_Ekle xmlns="https://turkpara.com.tr/">
+          <G>
+            <CLIENT_CODE>10738</CLIENT_CODE>
+            <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
+            <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
+          </G>
+          <GUID>{GUID}</GUID>
+          <KK_Sahibi>{kk_sahibi}</KK_Sahibi>
+          <KK_No>{kk_no}</KK_No>
+          <KK_SK_Ay>{kk_sk_ay}</KK_SK_Ay>
+          <KK_SK_Yil>{kk_sk_yil}</KK_SK_Yil>
+          <KK_Kart_Adi>{kk_kart_adi}</KK_Kart_Adi>
+          <KK_Islem_ID>{kk_islem_id}</KK_Islem_ID>
+        </KS_Kart_Ekle>
+      </soap:Body>
+    </soap:Envelope>"""
+
+    headers = {
+        "Content-Type": "text/xml; charset=utf-8",
+        "SOAPAction": "https://turkpara.com.tr/KS_Kart_Ekle"
+    }
+
+    url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+    response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)
+
+    try:
+        root = ET.fromstring(response.text)
+        ns = {
+            'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+            'ns': 'https://turkpara.com.tr/'
+        }
+
+        result = root.find('.//ns:KS_Kart_EkleResult', ns)
+        if result is None:
+            return f"<h3>Hata: API yanıtında 'KS_Kart_EkleResult' bulunamadı.</h3><pre>{response.text}</pre>"
+
+        sonuc = result.find('ns:Sonuc', ns)
+        sonuc_str = result.find('ns:Sonuc_Str', ns)
+
+        if sonuc is None or sonuc_str is None:
+            return f"<h3>Hata: API yanıtında 'Sonuc' veya 'Sonuc_Str' bulunamadı.</h3><pre>{response.text}</pre>"
+
+        print(f"API sonucu: {sonuc.text}, Mesaj: {sonuc_str.text}")  # Logla
+
+
+    except Exception as e:
+        return f"<h3>Hata oluştu:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 
 

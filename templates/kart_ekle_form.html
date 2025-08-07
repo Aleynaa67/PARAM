@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kart Ekle</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #5D3FD3; /* Mor menekşe */
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #30BFBF; /* Çamgöbeği / turkuaz */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #28a0a0;
+        }
+    </style>
+</head>
+<body>
+
+<form method="POST">
+    <h2>Kart Ekle</h2>
+
+    <label for="kk_sahibi">Kart Sahibi</label>
+    <input type="text" name="kk_sahibi" id="kk_sahibi" required>
+
+    <label for="kk_no">Kart Numarası</label>
+    <input type="text" name="kk_no" id="kk_no" maxlength="16" required>
+
+    <label for="kk_sk_ay">SK Ay</label>
+    <input type="text" name="kk_sk_ay" id="kk_sk_ay" maxlength="2" required>
+
+    <label for="kk_sk_yil">SK Yıl</label>
+    <input type="text" name="kk_sk_yil" id="kk_sk_yil" maxlength="4" required>
+
+    <label for="kk_kart_adi">Kart Adı (Opsiyonel)</label>
+    <input type="text" name="kk_kart_adi" id="kk_kart_adi">
+
+    <label for="kk_islem_id">İşlem ID (Opsiyonel)</label>
+    <input type="text" name="kk_islem_id" id="kk_islem_id">
+
+    <button type="submit">Kartı Kaydet</button>
+</form>
+
+</body>
+</html>
