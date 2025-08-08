@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>İşlem Başarılı</title>
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        .container {
+            background-color: #e8f5e9;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #c8e6c9;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2e7d32;
+        }
+
+        .info {
+            margin-top: 20px;
+        }
+
+        .info p {
+            margin: 10px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2e7d32;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #1b5e20;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💳 İşlem Başarılı</h2>
+
+    <div class="info">
+        <p><strong>İşlem ID:</strong> {{ islem_id }}</p>
+        <p><strong>Sonuç:</strong> {{ sonuc_str }}</p>
+    </div>
+
+    <a href="{{ ucd_url }}" target="_blank" class="button">3D Güvenli Ödeme Sayfasına Git</a>
+</div>
+
+</body>
+</html>

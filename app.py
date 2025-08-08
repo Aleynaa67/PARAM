@@ -4,6 +4,7 @@ import hashlib
 import base64
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 
@@ -33,6 +34,7 @@ def calculate_3d_hash(client_code, guid, islem_tutar, toplam_tutar, siparis_id, 
 
     print(f"3D Hash Result: {hash_result}")
     return hash_result
+
 
 
 #Kullanıcının girdiği kredi kartı bilgilerini ve ödeme detaylarını alıp,
@@ -984,6 +986,141 @@ def kart_ekle():
 
     except Exception as e:
         return f"<h3>Hata oluştu:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
+
+
+def calculate_doviz_hash(client_code, guid, islem_tutar, toplam_tutar, siparis_id, hata_url, basarili_url):
+    # 1. Değerleri birleştir (doğru sırayla)
+    islem_guvenlik_str = f"{client_code}{guid}{islem_tutar}{toplam_tutar}{siparis_id}{hata_url}{basarili_url}"
+
+    # 2. ISO-8859-9 ile encode et
+    encoded = islem_guvenlik_str.encode("iso-8859-9")
+
+    # 3. SHA1 hash + base64 encode
+    sha1_hash = hashlib.sha1(encoded).digest()
+    return base64.b64encode(sha1_hash).decode("utf-8")
+
+@app.route("/doviz-odeme", methods=["GET", "POST"])
+def odeme_doviz():
+    if request.method == "GET":
+        return render_template("doviz_odeme_form.html")
+
+    # Form verileri
+    # Form verileri
+    kk_sahibi = request.form.get("kk_sahibi", "").strip()
+    kk_no = request.form.get("kk_no", "").replace(" ", "").strip()
+    kk_sk_ay = request.form.get("kk_sk_ay", "").strip()
+    kk_sk_yil = request.form.get("kk_sk_yil", "").strip()
+    kk_cvc = request.form.get("kk_cvc", "").strip()
+    taksit = request.form.get("taksit", "1").strip()
+    islem_tutar = request.form.get("islem_tutar", "").replace(".", ",").strip()
+    toplam_tutar = request.form.get("toplam_tutar", "").replace(".", ",").strip()
+    doviz_kodu = "1001"  # USD
+    siparis_id = request.form.get("siparis_id", "").strip()
+
+
+#basarili_url = request.form.get("Basarili_URL", "https://dev.param.com.tr/tr").strip()
+#hata_url = request.form.get("Hata_URL", "https://dev.param.com.tr/tr").strip()
+
+    basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/3d-sonuc"
+    hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-hata"
+
+
+
+    islem_hash = calculate_doviz_hash(
+        CLIENT_CODE,
+        GUID,
+        islem_tutar,
+        toplam_tutar,
+        siparis_id,
+        hata_url,
+        basarili_url
+    )
+
+    xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <TP_Islem_Odeme_WD xmlns="https://turkpos.com.tr/">
+      <G>
+        <CLIENT_CODE>{CLIENT_CODE}</CLIENT_CODE>
+        <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
+        <CLIENT_PASSWORD>{CLIENT_PASSWORD}</CLIENT_PASSWORD>
+      </G>
+      <Doviz_Kodu>{doviz_kodu}</Doviz_Kodu>
+      <GUID>{GUID}</GUID>
+      <KK_Sahibi>{kk_sahibi}</KK_Sahibi>
+      <KK_No>{kk_no}</KK_No>
+      <KK_SK_Ay>{kk_sk_ay}</KK_SK_Ay>
+      <KK_SK_Yil>{kk_sk_yil}</KK_SK_Yil>
+      <KK_CVC>{kk_cvc}</KK_CVC>
+      <KK_Sahibi_GSM>5551231212</KK_Sahibi_GSM>
+      <Hata_URL>{hata_url}</Hata_URL>
+      <Basarili_URL>{basarili_url}</Basarili_URL>
+      <Siparis_ID>{siparis_id}</Siparis_ID>
+      <Siparis_Aciklama>3D Doviz Test</Siparis_Aciklama>
+      <Taksit>{taksit}</Taksit>
+      <Islem_Tutar>{islem_tutar}</Islem_Tutar>
+      <Toplam_Tutar>{toplam_tutar}</Toplam_Tutar>
+      <Islem_Hash>{islem_hash}</Islem_Hash>
+      <Islem_Guvenlik_Tip>3D</Islem_Guvenlik_Tip>
+      <IPAdr>127.0.0.1</IPAdr>
+      <Ref_URL>http://localhost:5000</Ref_URL>
+      <Data1>a</Data1><Data2>a</Data2><Data3>a</Data3><Data4>a</Data4><Data5>a</Data5>
+    </TP_Islem_Odeme_WD>
+  </soap:Body>
+</soap:Envelope>"""
+
+    headers = {
+        "Content-Type": "text/xml; charset=utf-8",
+        "SOAPAction": "https://turkpos.com.tr/TP_Islem_Odeme_WD"
+    }
+    url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+    response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)
+
+    try:
+        root = ET.fromstring(response.text)
+        ns = {'soap': 'http://schemas.xmlsoap.org/soap/envelope/', 'ns': 'https://turkpos.com.tr/'}
+
+        result = root.find(".//ns:TP_Islem_Odeme_WDResult", ns)
+        sonuc_tag = result.find("ns:Sonuc", ns)
+        sonuc = sonuc_tag.text if sonuc_tag is not None else "BULUNAMADI"
+
+        sonuc_str_tag = result.find("ns:Sonuc_Str", ns)
+        sonuc_str = sonuc_str_tag.text if sonuc_str_tag is not None else "BULUNAMADI"
+
+        ucd_html_tag = result.find("ns:UCD_HTML", ns)
+        ucd_html = ucd_html_tag.text if ucd_html_tag is not None else ""
+
+        if int(sonuc) > 0:
+            print("✔️ 3D işlemi başlatılabilir")
+            return render_template("doviz-sonuc.html", ucd_html=ucd_html)
+        else:
+            print("❌ İşlem başarısız:", sonuc_str)
+            return render_template("error.html", sonuc=sonuc, sonuc_str=sonuc_str)
+
+    except Exception as e:
+        return f"<h3>XML Parse Hatası</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
+
+
+
+@app.route("/doviz-sonuc", methods=["POST"])
+def sonuc_doviz():
+    try:
+        sonuc = request.form.get("Sonuc", "")
+        sonuc_str = request.form.get("Sonuc_Str", "")
+        islem_id = request.form.get("Islem_ID", "")
+        ucd_url = request.form.get("UCD_URL", "")
+        banka_sonuc_kod = request.form.get("Banka_Sonuc_Kod", "")
+
+        if sonuc.isdigit() and int(sonuc) > 0:
+            # Başarılı sonuç
+            return render_template("doviz-sonuc.html", islem_id=islem_id, sonuc_str=sonuc_str, ucd_url=ucd_url)
+        else:
+            # Başarısız işlem
+            return render_template("error.html", sonuc=sonuc, sonuc_str=sonuc_str)
+    except Exception as e:
+        return f"<h3>Sonuç işleme hatası</h3><pre>{str(e)}</pre><pre>{request.form}</pre>"
 
 if __name__ == '__main__':
     app.run(debug=True)
