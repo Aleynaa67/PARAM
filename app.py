@@ -999,12 +999,130 @@ def calculate_doviz_hash(client_code, guid, islem_tutar, toplam_tutar, siparis_i
     sha1_hash = hashlib.sha1(encoded).digest()
     return base64.b64encode(sha1_hash).decode("utf-8")
 
+
+import requests
+import json
+
+# Daha kapsamlı Türk BIN listesi (6 haneli)
+TURKISH_BINS = [
+    # Akbank
+    "430108", "542119", "549263", "454672", "540888", "531047",
+    # İş Bankası
+    "401127", "454360", "479184", "418342", "444678", "444676",
+    # Garanti BBVA
+    "487074", "526591", "540061", "549530", "489939", "540062",
+    # Yapı Kredi
+    "411885", "431940", "454091", "540456", "554960", "476272",
+    # QNB Finansbank (Finansbank)
+    "510034", "557358", "545616", "531214", "446371", "540313",
+    # DenizBank
+    "531047", "544834", "532457", "543080", "554817", "544815",
+    # Halkbank
+    "434508", "528207", "552879", "531879", "532194", "540670",
+    # Vakıfbank
+    "415565", "498432", "531886", "540879", "428747", "532058",
+    # Ziraat Bankası
+    "413042", "506919", "549067", "540026", "454672", "444678",
+    # TEB
+    "549760", "540026", "531886", "549548", "434373", "549889",
+    # HSBC
+    "549548", "434373", "535806", "540700", "492130", "533129",
+    # ING Bank
+    "549889", "535806", "548609", "531879", "540879", "532457",
+    # Diğer bankalar
+    "540700", "492130", "533129", "544815", "532194", "548609",
+    "531879", "540879", "532457", "549067", "532058", "540670",
+    "531886", "466283", "516458", "522221", "627768", "466284",
+    "670670", "454672", "444678", "444676"
+]
+
+
+def check_card_country_online(bin_number):
+    """Online BIN API ile kart ülkesini kontrol et"""
+    try:
+        # Binlist.net ücretsiz API (günde 10.000 istek)
+        url = f"https://lookup.binlist.net/{bin_number[:6]}"
+        headers = {"Accept-Version": "3"}
+
+        response = requests.get(url, headers=headers, timeout=3)
+
+        if response.status_code == 200:
+            data = response.json()
+            country_code = data.get("country", {}).get("alpha2", "").upper()
+            country_name = data.get("country", {}).get("name", "")
+
+            print(f"BIN: {bin_number[:6]} - Ülke: {country_name} ({country_code})")
+
+            # TR = Turkey
+            return country_code == "TR", country_name
+        else:
+            print(f"API hatası: {response.status_code}")
+            return None, None
+
+    except Exception as e:
+        print(f"Online kontrol hatası: {e}")
+        return None, None
+
+
+def is_turkish_card_offline(card_number):
+    """Offline Türk BIN kontrolü"""
+    if not card_number or len(card_number) < 6:
+        return False
+
+    bin_6 = card_number[:6]
+
+    # İlk 6 hane kontrolü
+    if bin_6 in TURKISH_BINS:
+        return True
+
+    # İlk 4 hane için ek kontroller
+    bin_4 = card_number[:4]
+    turkish_bin_4 = [
+        "4301", "5421", "5492", "4546", "5408", "5310",
+        "4011", "4543", "4791", "4183", "4446", "4870",
+        "5265", "5400", "5495", "4899", "4118", "4319",
+        "4540", "5549", "4762", "5100", "5573", "5456",
+        "5312", "4463", "5430", "5448", "5320", "5548",
+        "4345", "5282", "5528", "5318", "5321", "5324",
+        "4155", "4984", "5318", "5408", "4287", "5320",
+        "4130", "5069", "5490", "5400", "5497", "4349",
+        "5354", "5406", "5486", "4921", "5331", "5448",
+        "5321", "5408", "5324", "5490", "5320", "5406"
+    ]
+
+    return bin_4 in turkish_bin_4
+
+
+def validate_foreign_card_comprehensive(card_number):
+    """Kapsamlı yabancı kart kontrolü"""
+    if not card_number or len(card_number.replace(" ", "")) < 6:
+        return False, "Geçersiz kart numarası"
+
+    clean_card = card_number.replace(" ", "").replace("-", "")
+
+    # 1. Offline kontrol
+    if is_turkish_card_offline(clean_card):
+        return False, "Bu işlem sadece yabancı kartlarla yapılabilir. (Türk kartı tespit edildi)"
+
+    # 2. Online kontrol
+    is_turkish_online, country_name = check_card_country_online(clean_card)
+
+    if is_turkish_online is True:
+        return False, f"Bu işlem sadece yabancı kartlarla yapılabilir. Kart ülkesi: {country_name}"
+    elif is_turkish_online is False:
+        return True, f"Yabancı kart onaylandı. Kart ülkesi: {country_name}"
+    else:
+        # Online kontrol başarısızsa offline sonuca göre karar ver
+        # Güvenlik için: Bilinmeyen kartları da kabul et
+        print("Online kontrol başarısız, offline sonuca göre devam ediliyor")
+        return True, "Kart kontrolü tamamlandı"
+
+
 @app.route("/doviz-odeme", methods=["GET", "POST"])
 def odeme_doviz():
     if request.method == "GET":
         return render_template("doviz_odeme_form.html")
 
-    # Form verileri
     # Form verileri
     kk_sahibi = request.form.get("kk_sahibi", "").strip()
     kk_no = request.form.get("kk_no", "").replace(" ", "").strip()
@@ -1017,14 +1135,19 @@ def odeme_doviz():
     doviz_kodu = "1001"  # USD
     siparis_id = request.form.get("siparis_id", "").strip()
 
+    # KAPSAMLI YABANCI KART KONTROLÜ
+    is_valid, message = validate_foreign_card_comprehensive(kk_no)
 
-#basarili_url = request.form.get("Basarili_URL", "https://dev.param.com.tr/tr").strip()
-#hata_url = request.form.get("Hata_URL", "https://dev.param.com.tr/tr").strip()
+    print(f"Kart kontrolü - Geçerli: {is_valid}, Mesaj: {message}")
 
-    basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/3d-sonuc"
+    if not is_valid:
+        return render_template("error.html",
+                               sonuc="0",
+                               sonuc_str=message,
+                               hata_tipi="Kart Uygunluk Hatası")
+
+    basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/doviz-sonuc"
     hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-hata"
-
-
 
     islem_hash = calculate_doviz_hash(
         CLIENT_CODE,
@@ -1103,6 +1226,23 @@ def odeme_doviz():
         return f"<h3>XML Parse Hatası</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
 
+# Test fonksiyonu
+def test_card_validation():
+    """Test kartları ile doğrulama"""
+    test_cards = [
+        ("4301081234567890", "Akbank - Türk kartı"),
+        ("5421191234567890", "Akbank - Türk kartı"),
+        ("4000000000000002", "Test kartı - Yabancı"),
+        ("4242424242424242", "Stripe test - Yabancı"),
+        ("5555555555554444", "MasterCard test - Yabancı"),
+        ("4183421234567890", "İş Bankası - Türk kartı")
+    ]
+
+    print("Kart doğrulama testleri:")
+    for card, desc in test_cards:
+        is_valid, message = validate_foreign_card_comprehensive(card)
+        print(f"{card[:4]}******: {desc} -> {'✅ Geçerli' if is_valid else '❌ Reddedildi'} ({message})")
+
 
 @app.route("/doviz-sonuc", methods=["POST"])
 def sonuc_doviz():
@@ -1121,6 +1261,11 @@ def sonuc_doviz():
             return render_template("error.html", sonuc=sonuc, sonuc_str=sonuc_str)
     except Exception as e:
         return f"<h3>Sonuç işleme hatası</h3><pre>{str(e)}</pre><pre>{request.form}</pre>"
+
+
+# Test çalıştır
+if __name__ == "__main__":
+    test_card_validation()
 
 if __name__ == '__main__':
     app.run(debug=True)
