@@ -1441,34 +1441,47 @@ def odeme_doviz():
 
 @app.route("/doviz-sonuc", methods=["GET", "POST"])
 def sonuc_doviz():
-    """3D işlemi sonuç sayfası"""
+    """3D işlemi sonuç sayfası - Finalize'a yönlendirme yapar"""
     try:
-        # POST veya GET parametrelerini al
+        # POST ve GET parametrelerini al
+        params = {}
         if request.method == "POST":
-            params = request.form
-        else:
-            params = request.args
+            params.update(request.form.to_dict())
+        params.update(request.args.to_dict())
 
-        sonuc = params.get("Sonuc", "")
-        sonuc_str = params.get("Sonuc_Str", "")
-        islem_id = params.get("Islem_ID", "")
-        ucd_url = params.get("UCD_URL", "")
-        siparis_id = params.get("Siparis_ID", "")
+        sonuc = params.get("Sonuc", "").strip()
+        sonuc_str = params.get("Sonuc_Str", "").strip()
+        islem_id = params.get("Islem_ID", "").strip()
+        ucd_url = params.get("UCD_URL", "").strip()
+        siparis_id = params.get("Siparis_ID", "").strip()
 
         print(f"\n=== DOVIZ SONUC ===")
         print(f"Sonuc: {sonuc}")
         print(f"Sonuc_Str: {sonuc_str}")
         print(f"Islem_ID: {islem_id}")
+        print(f"UCD_URL: {ucd_url}")
         print(f"Siparis_ID: {siparis_id}")
         print(f"================\n")
 
-        return render_template("doviz_sonuc.html",
-                               islem_id=islem_id,
-                               sonuc_str=sonuc_str,
-                               sonuc=sonuc,
-                               ucd_url=ucd_url,
-                               siparis_id=siparis_id,
-                               all_params=dict(params))
+        # 3D başarılıysa finalize işlemine yönlendir
+        if sonuc == "1":
+            print("✅ 3D başarılı, finalize'a yönlendiriliyor...")
+            return redirect(url_for('finalize_doviz',
+                                  Sonuc=sonuc,
+                                  Sonuc_Str=sonuc_str,
+                                  Islem_ID=islem_id,
+                                  UCD_URL=ucd_url,
+                                  Siparis_ID=siparis_id))
+        else:
+            # 3D başarısızsa hata sayfasını göster
+            print("❌ 3D işlemi başarısız!")
+            return render_template("doviz_sonuc.html",
+                                 islem_id=islem_id,
+                                 sonuc_str=sonuc_str,
+                                 sonuc=sonuc,
+                                 siparis_id=siparis_id,
+                                 success=False,
+                                 hata_mesaj="3D doğrulama başarısız oldu.")
 
     except Exception as e:
         print(f"❌ Sonuc sayfası hatası: {str(e)}")
@@ -1478,62 +1491,153 @@ def sonuc_doviz():
                                hata_tipi="Sonuç Hatası")
 
 
+@app.route("/doviz-finalize", methods=["GET", "POST"])
+def finalize_doviz():
+    """3D işlem sonrası finalize işlemi"""
+    try:
+        # POST ve GET parametrelerini al
+        params = {}
+        if request.method == "POST":
+            params.update(request.form.to_dict())
+        params.update(request.args.to_dict())
+
+        # Parametreleri al
+        sonuc = params.get("Sonuc", "").strip()
+        sonuc_str = params.get("Sonuc_Str", "").strip()
+        islem_id = params.get("Islem_ID", "").strip()
+        ucd_url = params.get("UCD_URL", "").strip()
+        siparis_id = params.get("Siparis_ID", "").strip()
+        banka_sonuc_kod = params.get("Banka_Sonuc_Kod", "").strip()
+
+        print(f"\n=== FINALIZE İŞLEMİ ===")
+        print(f"Method: {request.method}")
+        print(f"Sonuc: '{sonuc}'")
+        print(f"Sonuc_Str: '{sonuc_str}'")
+        print(f"Islem_ID: '{islem_id}'")
+        print(f"UCD_URL: '{ucd_url}'")
+        print(f"Siparis_ID: '{siparis_id}'")
+        print(f"Banka_Sonuc_Kod: '{banka_sonuc_kod}'")
+        print(f"Tüm parametreler: {params}")
+        print(f"========================\n")
+
+        # Eğer 3D başarılıysa ve UCD_URL varsa, finalize işlemi yap
+        if sonuc == "1" and ucd_url:
+            print("✅ 3D başarılı, finalize işlemi yapılıyor...")
+
+            # PARAM finalize parametreleri hazırla
+            finalize_data = {
+                "CLIENT_CODE": "YOUR_CLIENT_CODE",  # PARAM'dan aldığınız kod
+                "CLIENT_USERNAME": "YOUR_USERNAME",
+                "CLIENT_PASSWORD": "YOUR_PASSWORD",
+                "GUID": "YOUR_GUID",
+                "UCD_URL": ucd_url,  # Bankadan gelen UCD_URL
+                "Islem_ID": islem_id,  # İşlem ID
+                "Siparis_ID": siparis_id if siparis_id else islem_id,
+                "TURKPOS_RETVAL_Addr": url_for('finalize_callback', _external=True),  # Finalize sonuç URL'i
+                "Lang": "TR"
+            }
+
+            # PARAM finalize servisine istek gönder
+            finalize_url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"  # Test URL - Production için değiştirin
+
+            print(f"🔄 Finalize isteği gönderiliyor: {finalize_url}")
 
 
+            # Form olarak finalize sayfasına yönlendir
+            return render_template("success.html",
+                                   action_url=finalize_url)
 
+        elif sonuc == "0":
+            print("❌ 3D işlemi başarısız!")
+            return render_template("doviz_sonuc.html",
+                                   islem_id=islem_id,
+                                   sonuc_str=sonuc_str,
+                                   sonuc=sonuc,
+                                   siparis_id=siparis_id,
+                                   success=False,
+                                   hata_mesaj="3D doğrulama başarısız oldu.")
 
-
-
-
-
-
-import requests
-from lxml import etree
-
-def finalize_payment(guid, islem_id, islem_hash):
-    url = "https://testpos.param.com.tr/PosGateway/api/PosService.svc?wsdl"  # veya finalize endpoint adresi
-    headers = {
-        "Content-Type": "text/xml; charset=utf-8",
-        "SOAPAction": "https://turkpos.com.tr/TP_Islem_Onayla"  # Bu SOAPAction API dokümanına göre
-    }
-
-    # SOAP XML isteği (TP_Islem_Onayla metodu)
-    body = f"""
-    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-      <soap:Body>
-        <TP_Islem_Onayla xmlns="https://turkpos.com.tr/">
-          <GUID>{guid}</GUID>
-          <Islem_ID>{islem_id}</Islem_ID>
-          <Islem_Hash>{islem_hash}</Islem_Hash>
-        </TP_Islem_Onayla>
-      </soap:Body>
-    </soap:Envelope>
-    """
-
-    response = requests.post(url, data=body.encode('utf-8'), headers=headers)
-    if response.status_code == 200:
-        # XML cevabı parse et
-        tree = etree.fromstring(response.content)
-        ns = {"soap": "http://schemas.xmlsoap.org/soap/envelope/", "ns": "https://turkpos.com.tr/"}
-        result = tree.xpath("//ns:TP_Islem_OnaylaResult", namespaces=ns)
-        if result:
-            sonuc = result[0].findtext("Sonuc")
-            sonuc_str = result[0].findtext("Sonuc_Str")
-            dekont_id = result[0].findtext("Dekont_ID")
-            print(f"Sonuç: {sonuc} - {sonuc_str} - Dekont ID: {dekont_id}")
-            return sonuc, sonuc_str, dekont_id
         else:
-            print("Sonuç bulunamadı.")
-    else:
-        print(f"Hata: HTTP {response.status_code}")
-    return None
+            print(f"⚠️ Bilinmeyen sonuç: {sonuc}")
+            return render_template("doviz_sonuc.html",
+                                   islem_id=islem_id,
+                                   sonuc_str=sonuc_str,
+                                   sonuc=sonuc,
+                                   siparis_id=siparis_id,
+                                   success=False,
+                                   hata_mesaj="Bilinmeyen durum.")
+
+    except Exception as e:
+        print(f"❌ Finalize hatası: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+        return render_template("error.html",
+                               sonuc="0",
+                               sonuc_str=f"Finalize hatası: {str(e)}",
+                               hata_tipi="Finalize Hatası"), 500
 
 
+@app.route("/doviz-finalize-callback", methods=["GET", "POST"])
+def finalize_callback():
+    """Finalize işlemi sonuç callback'i"""
+    try:
+        # POST ve GET parametrelerini al
+        params = {}
+        if request.method == "POST":
+            params.update(request.form.to_dict())
+        params.update(request.args.to_dict())
+
+        # Final sonuç parametreleri
+        final_sonuc = params.get("Sonuc", "").strip()
+        final_sonuc_str = params.get("Sonuc_Str", "").strip()
+        islem_id = params.get("Islem_ID", "").strip()
+        siparis_id = params.get("Siparis_ID", "").strip()
+        dekont_id = params.get("Dekont_ID", "").strip()
+        tutar = params.get("Tutar", "").strip()
+
+        print(f"\n=== FİNAL SONUÇ ===")
+        print(f"Final_Sonuc: '{final_sonuc}'")
+        print(f"Final_Sonuc_Str: '{final_sonuc_str}'")
+        print(f"Dekont_ID: '{dekont_id}'")
+        print(f"Tutar: '{tutar}'")
+        print(f"Tüm parametreler: {params}")
+        print(f"===================\n")
+
+        # Veritabanında işlemi güncelle
+        if final_sonuc == "1":
+            # Başarılı ödeme
+            print("🎉 Ödeme başarıyla tamamlandı!")
 
 
+            # update_payment_status(siparis_id, "completed", dekont_id)
+
+            return render_template("success.html",
+                                   dekont_id=dekont_id,
+                                   tutar=tutar,
+                                   siparis_id=siparis_id,
+                                   islem_id=islem_id)
+        else:
+            # Başarısız ödeme
+            print("❌ Final ödeme başarısız!")
 
 
+            # update_payment_status(siparis_id, "failed", None)
 
+            return render_template("error.html",
+                                   hata_mesaj=final_sonuc_str,
+                                   siparis_id=siparis_id,
+                                   islem_id=islem_id)
+
+    except Exception as e:
+        print(f"❌ Final callback hatası: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+        return render_template("error.html",
+                               sonuc="0",
+                               sonuc_str=f"Final callback hatası: {str(e)}",
+                               hata_tipi="Callback Hatası"), 500
 if __name__ == '__main__':
     app.run(debug=True)
 

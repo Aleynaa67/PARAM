@@ -2,17 +2,58 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>3D Güvenlik Yönlendirme</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İşlem Tamamlanıyor...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+        }
+    </style>
 </head>
-<body onload="document.forms[0].submit();">
-    <p>Lütfen bekleyin, 3D güvenlik ekranına yönlendiriliyorsunuz...</p>
+<body>
+    <div class="message">
+        <h2>💳 İşlem Tamamlanıyor</h2>
+        <div class="loader"></div>
+        <p>3D doğrulama başarılı! Ödeme işleminiz finalize ediliyor...</p>
+        <p><small>Lütfen sayfayı kapatmayınız.</small></p>
+    </div>
 
-    <form action="{{ ucd_url }}" method="POST">
-        <!-- ParamPOS bu endpoint'te ekstra parametre beklemiyor -->
+    <!-- Otomatik form submit -->
+    <form id="finalizeForm" action="{{action_url}}" method="post" style="display: none;">
+        {% for key, value in form_data.items() %}
+        <input type="hidden" name="{{key}}" value="{{value}}">
+        {% endfor %}
     </form>
 
-    <noscript>
-        <p>JavaScript etkin değil. <a href="{{ ucd_url }}">Buraya tıklayarak</a> devam edebilirsiniz.</p>
-    </noscript>
+    <script>
+        // Sayfa yüklendiğinde formu otomatik gönder
+        window.onload = function() {
+            document.getElementById('finalizeForm').submit();
+        };
+    </script>
 </body>
 </html>
