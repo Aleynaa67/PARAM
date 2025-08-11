@@ -1,216 +1,181 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Döviz Ödeme Formu</title>
-    <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        .success-message {
-            color: #28a745;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-control {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .btn {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Döviz Ödeme Formu</title>
+  <style>
+    .error-message {
+      color: #dc3545;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    .success-message {
+      color: #28a745;
+      font-size: 14px;
+      margin-top: 5px;
+      display: none;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .btn {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-    <h2>Döviz Ödemesi (Sadece Yabancı Kartlar)</h2>
 
-    <form id="dovizForm" method="POST" action="/doviz-odeme">
-        <div class="form-group">
-            <label for="kk_sahibi">Kart Sahibi:</label>
-            <input type="text" id="kk_sahibi" name="kk_sahibi" class="form-control" required>
-        </div>
+  <h2>Döviz Ödemesi (Sadece Belirli Yabancı Kartlar)</h2>
 
-        <div class="form-group">
-            <label for="kk_no">Kart Numarası:</label>
-            <input type="text" id="kk_no" name="kk_no" class="form-control" placeholder="**** **** **** ****" maxlength="19" required>
-            <div id="card-error" class="error-message">Bu işlem sadece yabancı kartlarla yapılabilir!</div>
-            <div id="card-success" class="success-message">✓ Yabancı kart algılandı</div>
-        </div>
+  <form id="dovizForm" method="POST" action="/doviz-odeme">
+    <div class="form-group">
+      <label for="kk_sahibi">Kart Sahibi:</label>
+      <input type="text" id="kk_sahibi" name="kk_sahibi" class="form-control" required>
+    </div>
 
-        <div class="form-group">
-            <label for="kk_sk_ay">Son Kullanma Ayı:</label>
-            <select id="kk_sk_ay" name="kk_sk_ay" class="form-control" required>
-                <option value="">Ay</option>
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-            </select>
-        </div>
+    <div class="form-group">
+      <label for="kk_no">Kart Numarası:</label>
+      <input type="text" id="kk_no" name="kk_no" class="form-control" placeholder="**** **** **** ****" maxlength="19" required>
+      <div id="card-error" class="error-message">Bu sistem sadece belirli yabancı test kartlarını kabul eder.</div>
+      <div id="card-success" class="success-message">✓ Geçerli test kartı</div>
+    </div>
 
-        <div class="form-group">
-            <label for="kk_sk_yil">Son Kullanma Yılı:</label>
-            <select id="kk_sk_yil" name="kk_sk_yil" class="form-control" required>
-                <option value="">Yıl</option>
-                <option value="25">2025</option>
-                <option value="26">2026</option>
-                <option value="27">2027</option>
-                <option value="28">2028</option>
-                <option value="29">2029</option>
-                <option value="30">2030</option>
-            </select>
-        </div>
+    <div class="form-group">
+      <label for="kk_sk_ay">Son Kullanma Ayı:</label>
+      <select id="kk_sk_ay" name="kk_sk_ay" class="form-control" required>
+        <option value="">Ay</option>
+        <option value="01">01</option>
+        <option value="02">02</option>
+        <option value="03">03</option>
+        <option value="04">04</option>
+        <option value="05">05</option>
+        <option value="06">06</option>
+        <option value="07">07</option>
+        <option value="08">08</option>
+        <option value="09">09</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+      </select>
+    </div>
 
-        <div class="form-group">
-            <label for="kk_cvc">CVC:</label>
-            <input type="text" id="kk_cvc" name="kk_cvc" class="form-control" maxlength="4" required>
-        </div>
+    <div class="form-group">
+      <label for="kk_sk_yil">Son Kullanma Yılı:</label>
+      <select id="kk_sk_yil" name="kk_sk_yil" class="form-control" required>
+        <option value="">Yıl</option>
+        <option value="25">2025</option>
+        <option value="26">2026</option>
+        <option value="27">2027</option>
+        <option value="28">2028</option>
+        <option value="29">2029</option>
+        <option value="30">2030</option>
+      </select>
+    </div>
 
-        <div class="form-group">
-            <label for="islem_tutar">İşlem Tutarı (USD):</label>
-            <input type="number" id="islem_tutar" name="islem_tutar" class="form-control" step="0.01" required>
-        </div>
+    <div class="form-group">
+      <label for="kk_cvc">CVC:</label>
+      <input type="text" id="kk_cvc" name="kk_cvc" class="form-control" maxlength="4" required>
+    </div>
 
-        <div class="form-group">
-            <label for="toplam_tutar">Toplam Tutar (USD):</label>
-            <input type="number" id="toplam_tutar" name="toplam_tutar" class="form-control" step="0.01" required>
-        </div>
+    <div class="form-group">
+      <label for="islem_tutar">İşlem Tutarı (USD):</label>
+      <input type="number" id="islem_tutar" name="islem_tutar" class="form-control" step="0.01" required>
+    </div>
 
-        <div class="form-group">
-            <label for="siparis_id">Sipariş ID:</label>
-            <input type="text" id="siparis_id" name="siparis_id" class="form-control" required>
-        </div>
+    <div class="form-group">
+      <label for="toplam_tutar">Toplam Tutar (USD):</label>
+      <input type="number" id="toplam_tutar" name="toplam_tutar" class="form-control" step="0.01" required>
+    </div>
 
-        <button type="submit" id="submit-btn" class="btn">Ödemeyi Başlat</button>
-    </form>
+    <div class="form-group">
+      <label for="siparis_id">Sipariş ID:</label>
+      <input type="text" id="siparis_id" name="siparis_id" class="form-control" required>
+    </div>
 
-    <script>
-        // Türk kartlarının BIN aralıkları
-        const turkishBins = [
-            430108, 542119, 549263, // Akbank
-            401127, 454360, 479184, // İş Bankası
-            487074, 526591, 540061, // Garanti BBVA
-            411885, 431940, 454091, // Yapı Kredi
-            510034, 557358, // QNB Finansbank
-            531047, 544834, // DenizBank
-            434508, 528207, // Halkbank
-            415565, 498432, // Vakıfbank
-            413042, 506919, // Ziraat Bankası
-            549760, 540026, // TEB
-            549548, 434373, // HSBC
-            549889, 535806, // ING
-            540700, // PTT Bank
-            492130, // Şekerbank
-            533129, // Odeabank
-            544815, // Burgan Bank
-            532194, // İCBC Turkey Bank
-            548609, // Alternatifbank
-            531879, // Anadolubank
-            540879, // Fibabanka
-            532457, // Türkiye Emlak Katılım
-            549067, // Kuveyt Türk
-            532058, // Albaraka Türk
-            540670, // Ziraat Katılım
-            531886  // Vakıf Katılım
-        ];
+    <button type="submit" id="submit-btn" class="btn">Ödemeyi Başlat</button>
+  </form>
 
-        function formatCardNumber(value) {
-            // Sayılar dışındaki karakterleri kaldır
-            const cleaned = value.replace(/\D/g, '');
+  <script>
+    // Sadece izin verilen yabancı kartlar
+    const validCards = [
+      "5163103002982563",
+      "5486742060635314",
+      "9792004525458548"
+    ];
 
-            // Her 4 hanede bir boşluk ekle
-            const formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
+    function formatCardNumber(value) {
+      return value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+    }
 
-            return formatted;
+    function isValidTestCard(cardNumber) {
+      const cleaned = cardNumber.replace(/\D/g, '');
+      return validCards.includes(cleaned);
+    }
+
+    function validateCard() {
+      const cardInput = document.getElementById('kk_no');
+      const errorMsg = document.getElementById('card-error');
+      const successMsg = document.getElementById('card-success');
+      const submitBtn = document.getElementById('submit-btn');
+      const cardNumber = cardInput.value;
+
+      if (cardNumber.length >= 6) {
+        if (isValidTestCard(cardNumber)) {
+          errorMsg.style.display = 'none';
+          successMsg.style.display = 'block';
+          submitBtn.disabled = false;
+          cardInput.style.borderColor = '#28a745';
+        } else {
+          errorMsg.style.display = 'block';
+          successMsg.style.display = 'none';
+          submitBtn.disabled = true;
+          cardInput.style.borderColor = '#dc3545';
         }
+      } else {
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        submitBtn.disabled = false;
+        cardInput.style.borderColor = '#ddd';
+      }
+    }
 
-        function isTurkishCard(cardNumber) {
-            const cleaned = cardNumber.replace(/\D/g, '');
-            if (cleaned.length < 6) return false;
+    document.getElementById('kk_no').addEventListener('input', function(e) {
+      e.target.value = formatCardNumber(e.target.value);
+      validateCard();
+    });
 
-            const bin = parseInt(cleaned.substring(0, 6));
-            return turkishBins.includes(bin);
-        }
+    // Form gönderiminde kontrol
+    document.getElementById('dovizForm').addEventListener('submit', function(e) {
+      const cardNumber = document.getElementById('kk_no').value;
+      if (!isValidTestCard(cardNumber)) {
+        e.preventDefault();
+        alert("❌ Bu sistem sadece belirli yabancı test kartlarını kabul eder.");
+        return false;
+      }
+    });
 
-        function validateCard() {
-            const cardInput = document.getElementById('kk_no');
-            const errorMsg = document.getElementById('card-error');
-            const successMsg = document.getElementById('card-success');
-            const submitBtn = document.getElementById('submit-btn');
-
-            const cardNumber = cardInput.value.replace(/\D/g, '');
-
-            if (cardNumber.length >= 6) {
-                if (isTurkishCard(cardNumber)) {
-                    errorMsg.style.display = 'block';
-                    successMsg.style.display = 'none';
-                    submitBtn.disabled = true;
-                    cardInput.style.borderColor = '#dc3545';
-                } else {
-                    errorMsg.style.display = 'none';
-                    successMsg.style.display = 'block';
-                    submitBtn.disabled = false;
-                    cardInput.style.borderColor = '#28a745';
-                }
-            } else {
-                errorMsg.style.display = 'none';
-                successMsg.style.display = 'none';
-                submitBtn.disabled = false;
-                cardInput.style.borderColor = '#ddd';
-            }
-        }
-
-        document.getElementById('kk_no').addEventListener('input', function(e) {
-            // Formatla
-            e.target.value = formatCardNumber(e.target.value);
-
-            // Validate et
-            validateCard();
-        });
-
-        // Form gönderiminde son kontrol
-        document.getElementById('dovizForm').addEventListener('submit', function(e) {
-            const cardNumber = document.getElementById('kk_no').value.replace(/\D/g, '');
-
-            if (isTurkishCard(cardNumber)) {
-                e.preventDefault();
-                alert('Bu işlem sadece yabancı kartlarla yapılabilir!');
-                return false;
-            }
-        });
-
-        // Toplam tutarı otomatik hesapla
-        document.getElementById('islem_tutar').addEventListener('input', function() {
-            const islemTutar = parseFloat(this.value) || 0;
-            document.getElementById('toplam_tutar').value = islemTutar.toFixed(2);
-        });
-    </script>
+    // Toplam tutarı otomatik güncelle
+    document.getElementById('islem_tutar').addEventListener('input', function() {
+      const islemTutar = parseFloat(this.value) || 0;
+      document.getElementById('toplam_tutar').value = islemTutar.toFixed(2);
+    });
+  </script>
 </body>
 </html>

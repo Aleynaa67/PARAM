@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Güvenlik Yönlendirme</title>
+</head>
+<body onload="document.forms[0].submit();">
+    <p>Lütfen bekleyin, 3D güvenlik ekranına yönlendiriliyorsunuz...</p>
+
+    <form action="{{ ucd_url }}" method="POST">
+        <!-- ParamPOS bu endpoint'te ekstra parametre beklemiyor -->
+    </form>
+
+    <noscript>
+        <p>JavaScript etkin değil. <a href="{{ ucd_url }}">Buraya tıklayarak</a> devam edebilirsiniz.</p>
+    </noscript>
+</body>
+</html>

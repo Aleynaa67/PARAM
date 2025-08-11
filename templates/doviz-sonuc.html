@@ -2,63 +2,19 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>İşlem Başarılı</title>
-    <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-
-        .container {
-            background-color: #e8f5e9;
-            padding: 30px;
-            border-radius: 10px;
-            border: 1px solid #c8e6c9;
-            max-width: 600px;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            color: #2e7d32;
-        }
-
-        .info {
-            margin-top: 20px;
-        }
-
-        .info p {
-            margin: 10px 0;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #2e7d32;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-
-        .button:hover {
-            background-color: #1b5e20;
-        }
-    </style>
+    <title>3D Güvenlik Yönlendirme</title>
 </head>
 <body>
+    <p>3D Secure sayfasına yönlendiriliyorsunuz...</p>
 
-<div class="container">
-    <h2>💳 İşlem Başarılı</h2>
+    <form id="threeDSecureForm" action="http://testpos.param.com.tr/Tahsilat/3D_Secure/AkilliKart_3DPay_EST_Doviz.aspx" method="post">
+        <input type="hidden" name="rURL" value="TURKPOS_3D_TRAN">
+        <input type="hidden" name="SID" value="5f76aae9-2068-46b8-9900-1ff700f2a2ef">
+        <input type="hidden" name="g" value="5c1b8a0c-9688-4042-8a1d-e2ed3d881a65">
+        <input type="hidden" name="d" value="">
+        <!-- Gerekli diğer parametreler varsa onları da buraya ekleyin -->
+    </form>
 
-    <div class="info">
-        <p><strong>İşlem ID:</strong> {{ islem_id }}</p>
-        <p><strong>Sonuç:</strong> {{ sonuc_str }}</p>
-    </div>
-
-    <a href="{{ ucd_url }}" target="_blank" class="button">3D Güvenli Ödeme Sayfasına Git</a>
-</div>
 
 </body>
 </html>
