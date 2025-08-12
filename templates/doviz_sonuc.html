@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if success %}Ödeme Başarılı{% else %}Ödeme Başarısız{% endif %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            border-left: 5px solid #28a745;
+            background: #d4edda;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #dc3545;
+            border-left: 5px solid #dc3545;
+            background: #f8d7da;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .value {
+            color: #6c757d;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if success %}
+            <div class="success">
+                <h2>✅ Ödeme Başarılı!</h2>
+                <p>
+                    {% if finalized %}
+                        İşleminiz başarıyla tamamlandı ve onaylandı.
+                    {% else %}
+                        İşleminiz başarıyla gerçekleştirildi.
+                    {% endif %}
+                </p>
+            </div>
+        {% else %}
+            <div class="error">
+                <h2>❌ Ödeme Başarısız!</h2>
+                <p>{{ hata_mesaj or "İşlem gerçekleştirilemedi." }}</p>
+            </div>
+        {% endif %}
+
+        <div class="details">
+            <h3>İşlem Detayları</h3>
+
+            {% if turkpos_guid %}
+            <div class="detail-row">
+                <span class="label">İşlem GUID:</span>
+                <span class="value">{{ turkpos_guid }}</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_dekont_id %}
+            <div class="detail-row">
+                <span class="label">Dekont No:</span>
+                <span class="value">{{ turkpos_dekont_id }}</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_islem_tarih %}
+            <div class="detail-row">
+                <span class="label">İşlem Tarihi:</span>
+                <span class="value">{{ turkpos_islem_tarih }}</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_tahsilat_tutari %}
+            <div class="detail-row">
+                <span class="label">Tahsilat Tutarı:</span>
+                <span class="value">{{ turkpos_tahsilat_tutari }} ₺</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_odeme_tutari %}
+            <div class="detail-row">
+                <span class="label">Net Tutar:</span>
+                <span class="value">{{ turkpos_odeme_tutari }} ₺</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_kk_no %}
+            <div class="detail-row">
+                <span class="label">Kart No:</span>
+                <span class="value">{{ turkpos_kk_no }}</span>
+            </div>
+            {% endif %}
+
+            {% if siparis_id %}
+            <div class="detail-row">
+                <span class="label">Sipariş ID:</span>
+                <span class="value">{{ siparis_id }}</span>
+            </div>
+            {% endif %}
+
+            {% if islem_id %}
+            <div class="detail-row">
+                <span class="label">İşlem ID:</span>
+                <span class="value">{{ islem_id }}</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_sonuc_str %}
+            <div class="detail-row">
+                <span class="label">Sonuç Mesajı:</span>
+                <span class="value">{{ turkpos_sonuc_str }}</span>
+            </div>
+            {% endif %}
+
+            {% if turkpos_banka_kod and not success %}
+            <div class="detail-row">
+                <span class="label">Banka Hata Kodu:</span>
+                <span class="value">{{ turkpos_banka_kod }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if success %}
+            <a href="{{ url_for('index') }}" class="button">Anasayfaya Dön</a>
+        {% else %}
+            <a href="{{ url_for('doviz') }}" class="button">Tekrar Dene</a>
+        {% endif %}
+    </div>
+</body>
+</html>

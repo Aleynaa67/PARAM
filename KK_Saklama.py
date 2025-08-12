@@ -3,7 +3,7 @@ import requests
 url = "https://testposws.param.com.tr/out.ws/service_ks.asmx?wsdl"
 
 xml_data =""" <?xml version="1.0" encoding="utf-8"?> <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"> <soap:Body>
-<KS_Kart_Ekle xmlns="https://turkpara.com.tr/">
+<KK_Saklama xmlns="https://turkpos.com.tr/KK_Saklama/">
 <G>
 <CLIENT_CODE>10738</CLIENT_CODE>
 <CLIENT_USERNAME>Test</CLIENT_USERNAME>
@@ -16,14 +16,14 @@ xml_data =""" <?xml version="1.0" encoding="utf-8"?> <soap:Envelope xmlns:xsi="h
 <KK_SK_Yil>26</KK_SK_Yil>
 <KK_Kart_Adi>Albert</KK_Kart_Adi>
 <KK_Islem_ID></KK_Islem_ID>
-</KS_Kart_Ekle>
+</KK_Saklama>
 </soap:Body>
 </soap:Envelope>"""
 
 
 headers = {
     "Content-Type": "text/xml; charset=utf-8",
-    "SOAPAction": "https://turkpara.com.tr/KS_Kart_Ekle"
+    "SOAPAction": "https://turkpos.com.tr/KK_Saklama"
 }
 # POST isteği gönder
 response = requests.post(url, data=xml_data.encode("utf-8"), headers=headers)

@@ -920,6 +920,11 @@ def parse_soap_response(xml_response):
         traceback.print_exc()
         return None
 
+from flask import Flask, request, render_template
+import requests
+import xml.etree.ElementTree as ET
+
+
 
 @app.route("/kart-ekle", methods=["GET", "POST"])
 def kart_ekle():
@@ -939,7 +944,7 @@ def kart_ekle():
                    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                    xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
       <soap:Body>
-        <KS_Kart_Ekle xmlns="https://turkpara.com.tr/">
+        <KK_Saklama xmlns="https://turkpos.com.tr/KK_Saklama/">
           <G>
             <CLIENT_CODE>10738</CLIENT_CODE>
             <CLIENT_USERNAME>{CLIENT_USERNAME}</CLIENT_USERNAME>
@@ -952,13 +957,13 @@ def kart_ekle():
           <KK_SK_Yil>{kk_sk_yil}</KK_SK_Yil>
           <KK_Kart_Adi>{kk_kart_adi}</KK_Kart_Adi>
           <KK_Islem_ID>{kk_islem_id}</KK_Islem_ID>
-        </KS_Kart_Ekle>
+        </KK_Saklama>
       </soap:Body>
     </soap:Envelope>"""
 
     headers = {
         "Content-Type": "text/xml; charset=utf-8",
-        "SOAPAction": "https://turkpara.com.tr/KS_Kart_Ekle"
+        "SOAPAction": "https://turkpos.com.tr/KK_Saklama"
     }
 
     url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
@@ -973,198 +978,45 @@ def kart_ekle():
 
         result = root.find('.//ns:KS_Kart_EkleResult', ns)
         if result is None:
-            return f"<h3>Hata: API yanıtında 'KS_Kart_EkleResult' bulunamadı.</h3><pre>{response.text}</pre>"
+            return f"<h3>Hata: Yanıtta 'KK_SaklamaResult' bulunamadı.</h3><pre>{response.text}</pre>"
 
-        sonuc = result.find('ns:Sonuc', ns)
-        sonuc_str = result.find('ns:Sonuc_Str', ns)
+        # Bazı durumlarda result.text XML olabilir, kontrol et
+        try:
+            result_xml = ET.fromstring(result.text)
+            sonuc = result_xml.find('Sonuc')
+            sonuc_str = result_xml.find('Sonuc_Str')
+        except:
+            # Alternatif: doğrudan element içindeki alt etiketlere bak
+            sonuc = result.find('ns:Sonuc', ns)
+            sonuc_str = result.find('ns:Sonuc_Str', ns)
 
-        if sonuc is None or sonuc_str is None:
-            return f"<h3>Hata: API yanıtında 'Sonuc' veya 'Sonuc_Str' bulunamadı.</h3><pre>{response.text}</pre>"
+        if sonuc is not None and sonuc_str is not None:
+            return f"<h3>Sonuç: {sonuc.text}</h3><p>Mesaj: {sonuc_str.text}</p>"
 
-        print(f"API sonucu: {sonuc.text}, Mesaj: {sonuc_str.text}")  # Logla
-
+        return f"<h3>Hata: 'Sonuc' veya 'Sonuc_Str' bulunamadı.</h3><pre>{ET.tostring(result, encoding='unicode')}</pre>"
 
     except Exception as e:
         return f"<h3>Hata oluştu:</h3><pre>{str(e)}</pre><pre>{response.text}</pre>"
 
 
-import hashlib
-import base64
-import requests
-import xml.etree.ElementTree as ET
-from flask import request, render_template
-
-
 def calculate_doviz_hash(client_code, guid, islem_tutar, toplam_tutar, siparis_id, hata_url, basarili_url):
-    # 1. Değerleri birleştir (doğru sırayla)
-    islem_guvenlik_str = f"{client_code}{guid}{islem_tutar}{toplam_tutar}{siparis_id}{hata_url}{basarili_url}"
+    hash_str = f"{client_code}{guid}{islem_tutar.replace(',', '.')}{toplam_tutar.replace(',', '.')}{siparis_id}{hata_url}{basarili_url}"
+    print(f"🔑 Hash Hesaplama Öncesi: {hash_str}")  # DEBUG
 
-    # 2. ISO-8859-9 ile encode et
-    encoded = islem_guvenlik_str.encode("iso-8859-9")
-
-    # 3. SHA1 hash + base64 encode
-    sha1_hash = hashlib.sha1(encoded).digest()
-    return base64.b64encode(sha1_hash).decode("utf-8")
-
-
-# Test için geçerli yabancı kart numaraları
-TEST_FOREIGN_CARDS = {
-    "4012000033330026": "Visa Test Card (US)",  # Visa US test kartı
-    "4111111111111111": "Visa Test Card (Generic)",  # Genel Visa test kartı
-    "5555555555554444": "Mastercard Test Card (US)",  # Mastercard US test kartı
-    "4000000000000002": "Visa Test Card (Declined)",  # Test için reddedilecek kart
-    "4242424242424242": "Visa Test Card (3D Success)",  # 3D başarılı test kartı
-    "4000000000000101": "Visa Test Card (3D Auth Required)",  # 3D doğrulama gerekli
-}
-
-# Güncellenmiş Türk BIN listesi
-TURKISH_BINS = [
-    # Akbank
-    "430108", "542119", "549263", "454672", "540888", "531047",
-    # İş Bankası
-    "401127", "454360", "479184", "418342", "444678", "444676",
-    # Garanti BBVA
-    "487074", "526591", "540061", "549530", "489939", "540062",
-    # Yapı Kredi
-    "411885", "431940", "454091", "540456", "554960", "476272",
-    # QNB Finansbank
-    "510034", "557358", "545616", "531214", "446371", "540313",
-    # DenizBank
-    "531047", "544834", "532457", "543080", "554817", "544815",
-    # Halkbank
-    "434508", "528207", "552879", "531879", "532194", "540670",
-    # Vakıfbank
-    "415565", "498432", "531886", "540879", "428747", "532058",
-    # Ziraat Bankası
-    "413042", "506919", "549067", "540026", "454672", "444678",
-    # TEB
-    "549760", "540026", "531886", "549548", "434373", "549889",
-    # HSBC
-    "549548", "434373", "535806", "540700", "492130", "533129",
-    # ING Bank
-    "549889", "535806", "548609", "531879", "540879", "532457",
-]
-
-
-def check_card_country_online(card_number):
-    """Online BIN API ile kart ülkesini kontrol et - geliştirilmiş versiyon"""
-    bin_number = card_number[:6]
-
-    # Birden fazla API deneyebiliriz
-    apis = [
-        f"https://lookup.binlist.net/{bin_number}",
-        f"https://api.bintable.com/v1/{bin_number}",
-    ]
-
-    for api_url in apis:
-        try:
-            headers = {"Accept-Version": "3", "User-Agent": "Mozilla/5.0"}
-            response = requests.get(api_url, headers=headers, timeout=5)
-
-            if response.status_code == 200:
-                data = response.json()
-
-                # BinList API formatı
-                if 'country' in data:
-                    country_code = data.get("country", {}).get("alpha2", "").upper()
-                    country_name = data.get("country", {}).get("name", "Bilinmiyor")
-                # BinTable API formatı
-                elif 'country_code' in data:
-                    country_code = data.get("country_code", "").upper()
-                    country_name = data.get("country_name", "Bilinmiyor")
-                else:
-                    continue
-
-                print(f"✓ BIN API - {bin_number}: {country_name} ({country_code})")
-                return country_code == "TR", country_name
-
-        except Exception as e:
-            print(f"API {api_url} hatası: {e}")
-            continue
-
-    return None, None
-
-
-def is_turkish_card_offline(card_number):
-    """Geliştirilmiş offline Türk kart kontrolü"""
-    if not card_number or len(card_number) < 6:
-        return False
-
-    clean_card = card_number.replace(" ", "").replace("-", "")
-
-    # Test kartları için özel kontrol
-    if clean_card in TEST_FOREIGN_CARDS:
-        print(f"✓ Test kartı tespit edildi: {TEST_FOREIGN_CARDS[clean_card]}")
-        return False  # Test kartları yabancı olarak kabul et
-
-    bin_6 = clean_card[:6]
-    bin_4 = clean_card[:4]
-
-    # 6 haneli BIN kontrolü
-    if bin_6 in TURKISH_BINS:
-        return True
-
-    # 4 haneli BIN kontrolü
-    turkish_bin_4 = [bin[:4] for bin in TURKISH_BINS]
-    if bin_4 in turkish_bin_4:
-        return True
-
-    return False
-
-
-def validate_card_for_forex(card_number):
-    """Dövizli işlemler için kart doğrulama"""
-    if not card_number or len(card_number.replace(" ", "").replace("-", "")) < 13:
-        return False, "Geçersiz kart numarası formatı"
-
-    clean_card = card_number.replace(" ", "").replace("-", "")
-
-    # Luhn algoritması ile kart numarası doğrulama
-    def luhn_check(card_num):
-        def digits_of(n):
-            return [int(d) for d in str(n)]
-
-        digits = digits_of(card_num)
-        odd_digits = digits[-1::-2]
-        even_digits = digits[-2::-2]
-        checksum = sum(odd_digits)
-        for d in even_digits:
-            checksum += sum(digits_of(d * 2))
-        return checksum % 10 == 0
-
-    if not luhn_check(clean_card):
-        return False, "Kart numarası geçerli değil (Luhn kontrolü başarısız)"
-
-    # Test kartı kontrolü
-    if clean_card in TEST_FOREIGN_CARDS:
-        return True, f"Test kartı kabul edildi: {TEST_FOREIGN_CARDS[clean_card]}"
-
-    # 1. Offline kontrol
-    if is_turkish_card_offline(clean_card):
-        return False, "Bu işlem sadece yabancı kartlarla yapılabilir (Türk kartı tespit edildi)"
-
-    # 2. Online kontrol
-    is_turkish_online, country_name = check_card_country_online(clean_card)
-
-    if is_turkish_online is True:
-        return False, f"Bu işlem sadece yabancı kartlarla yapılabilir. Kart ülkesi: {country_name}"
-    elif is_turkish_online is False:
-        return True, f"✓ Yabancı kart onaylandı. Kart ülkesi: {country_name}"
-    else:
-        # Online kontrol başarısızsa, güvenlik için offline sonuca göre karar ver
-        print("⚠ Online kontrol başarısız, offline sonuca göre devam ediliyor")
-        return True, "Kart kontrolü tamamlandı (offline)"
+    # Encoding kontrolü
+    hash_object = hashlib.sha1(hash_str.encode('utf-8'))
+    return base64.b64encode(hash_object.digest()).decode('utf-8')
 
 
 @app.route("/doviz-odeme", methods=["GET", "POST"])
 def odeme_doviz():
     if request.method == "GET":
-        return render_template("doviz_odeme_form.html", test_cards=TEST_FOREIGN_CARDS)
+        return render_template("doviz_odeme_form.html")
 
     # Form verileri - geliştirilmiş validasyon
     kk_sahibi = request.form.get("kk_sahibi", "").strip()
     kk_no = request.form.get("kk_no", "").replace(" ", "").replace("-", "").strip()
-    kk_sk_ay = request.form.get("kk_sk_ay", "").strip().zfill(2)  # 01, 02 formatında
+    kk_sk_ay = request.form.get("kk_sk_ay", "").strip().zfill(2)
     kk_sk_yil = request.form.get("kk_sk_yil", "").strip()
     kk_cvc = request.form.get("kk_cvc", "").strip()
     taksit = request.form.get("taksit", "1").strip()
@@ -1173,26 +1025,72 @@ def odeme_doviz():
     doviz_kodu = "1001"  # USD
     siparis_id = request.form.get("siparis_id", "").strip()
 
-    # Zorunlu alanları kontrol et
-    required_fields = {
-        'kk_sahibi': kk_sahibi,
-        'kk_no': kk_no,
-        'kk_sk_ay': kk_sk_ay,
-        'kk_sk_yil': kk_sk_yil,
-        'kk_cvc': kk_cvc,
-        'islem_tutar': islem_tutar,
-        'toplam_tutar': toplam_tutar,
-        'siparis_id': siparis_id
-    }
+    basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/3d-sonuc"
+    hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-hata"
 
-    missing_fields = [k for k, v in required_fields.items() if not v]
-    if missing_fields:
+
+    # 🔍 DEBUG: Gönderilen verileri kontrol et
+    print("\n" + "=" * 50)
+    print("🔍 3D İŞLEM DEBUG - GÖNDERME ÖNCESİ")
+    print("=" * 50)
+    print(f"CLIENT_CODE: {CLIENT_CODE}")
+    print(f"CLIENT_USERNAME: {CLIENT_USERNAME}")
+    print(f"GUID: {GUID}")
+    print(f"KK Sahibi: {kk_sahibi}")
+    print(f"KK No: {kk_no[:6]}****{kk_no[-4:] if len(kk_no) >= 10 else 'HATA'}")
+    print(f"SK Ay: {kk_sk_ay}")
+    print(f"SK Yıl: {kk_sk_yil}")
+    print(f"CVC: {'*' * len(kk_cvc)}")
+    print(f"İşlem Tutar: {islem_tutar}")
+    print(f"Toplam Tutar: {toplam_tutar}")
+    print(f"Sipariş ID: {siparis_id}")
+    print(f"Başarılı URL: {basarili_url}")
+    print(f"Hata URL: {hata_url}")
+    print("=" * 50 + "\n")
+
+    # 🚨 KRİTİK KONTROLLER
+    validation_errors = []
+
+    # Kart numarası kontrolü
+    if not kk_no or len(kk_no) < 15 or len(kk_no) > 19:
+        validation_errors.append("Kart numarası 15-19 haneli olmalı")
+
+    # Kart sahibi kontrolü
+    if not kk_sahibi or len(kk_sahibi) < 2:
+        validation_errors.append("Kart sahibi adı en az 2 karakter olmalı")
+
+    # CVC kontrolü
+    if not kk_cvc or len(kk_cvc) < 3:
+        validation_errors.append("CVC kodu en az 3 haneli olmalı")
+
+    # Tutar kontrolü
+    if not islem_tutar or not toplam_tutar:
+        validation_errors.append("İşlem tutarı boş olamaz")
+
+    # Sipariş ID kontrolü
+    if not siparis_id:
+        validation_errors.append("Sipariş ID boş olamaz")
+
+    if validation_errors:
+        print(f"❌ VALIDASYON HATALARI: {validation_errors}")
         return render_template("error.html",
                                sonuc="0",
-                               sonuc_str=f"Eksik alanlar: {', '.join(missing_fields)}",
-                               hata_tipi="Form Validasyon Hatası")
+                               sonuc_str=f"Form doğrulama hataları: {', '.join(validation_errors)}",
+                               hata_tipi="Validasyon Hatası")
 
-    # Tarih validasyonu
+    # Hash hesapla
+    islem_hash = calculate_doviz_hash(
+        CLIENT_CODE,
+        GUID,
+        islem_tutar,
+        toplam_tutar,
+        siparis_id,
+        hata_url,
+        basarili_url
+    )
+    print(f"🔐 Hesaplanan Hash: {islem_hash}")
+
+    # Tarih kontrolü
     try:
         ay = int(kk_sk_ay)
         yil = int(kk_sk_yil) if len(kk_sk_yil) == 4 else int(f"20{kk_sk_yil}")
@@ -1202,47 +1100,16 @@ def odeme_doviz():
         if yil < 2024 or yil > 2040:
             raise ValueError("Geçersiz yıl")
 
-        kk_sk_yil = str(yil)  # 4 haneli yıl formatında
+        kk_sk_yil = str(yil)
 
     except ValueError as e:
+        print(f"❌ Tarih hatası: {e}")
         return render_template("error.html",
                                sonuc="0",
                                sonuc_str=f"Kart son kullanma tarihi hatalı: {e}",
                                hata_tipi="Tarih Hatası")
 
-    # KAPSAMLI KART KONTROLÜ
-    is_valid, message = validate_card_for_forex(kk_no)
-    print(f"Kart doğrulama - Geçerli: {is_valid}, Mesaj: {message}")
-
-    if not is_valid:
-        return render_template("error.html",
-                               sonuc="0",
-                               sonuc_str=message,
-                               hata_tipi="Kart Uygunluk Hatası")
-
-    # URL'ler
-    basarili_url = request.form.get("Basarili_URL") or "http://localhost:5000/doviz-sonuc"
-    hata_url = request.form.get("Hata_URL") or "http://localhost:5000/3d-hata"
-
-    # Hash hesaplama
-    islem_hash = calculate_doviz_hash(
-        CLIENT_CODE, GUID, islem_tutar, toplam_tutar,
-        siparis_id, hata_url, basarili_url
-    )
-
-    print(f"\n=== İŞLEM PARAMETRELERİ ===")
-    print(f"CLIENT_CODE: {CLIENT_CODE}")
-    print(f"GUID: {GUID}")
-    print(f"Kart sahibi: {kk_sahibi}")
-    print(f"Kart no: {kk_no[:6]}******{kk_no[-4:]}")
-    print(f"SK Ay/Yıl: {kk_sk_ay}/{kk_sk_yil}")
-    print(f"İşlem tutarı: {islem_tutar}")
-    print(f"Toplam tutar: {toplam_tutar}")
-    print(f"Sipariş ID: {siparis_id}")
-    print(f"Hash: {islem_hash}")
-    print(f"========================\n")
-
-    # SOAP XML oluştur - geliştirilmiş format
+    # 🚨 XML'de kritik değişiklikler
     xml_data = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -1256,23 +1123,23 @@ def odeme_doviz():
       </G>
       <Doviz_Kodu>{doviz_kodu}</Doviz_Kodu>
       <GUID>{GUID}</GUID>
-      <KK_Sahibi>{kk_sahibi}</KK_Sahibi>
+      <KK_Sahibi><![CDATA[{kk_sahibi}]]></KK_Sahibi>
       <KK_No>{kk_no}</KK_No>
       <KK_SK_Ay>{kk_sk_ay}</KK_SK_Ay>
       <KK_SK_Yil>{kk_sk_yil}</KK_SK_Yil>
       <KK_CVC>{kk_cvc}</KK_CVC>
-      <KK_Sahibi_GSM>5551234567</KK_Sahibi_GSM>
-      <Hata_URL>{hata_url}</Hata_URL>
-      <Basarili_URL>{basarili_url}</Basarili_URL>
+      <KK_Sahibi_GSM>5551231212</KK_Sahibi_GSM>
+      <Hata_URL><![CDATA[{hata_url}]]></Hata_URL>
+      <Basarili_URL><![CDATA[{basarili_url}]]></Basarili_URL>
       <Siparis_ID>{siparis_id}</Siparis_ID>
-      <Siparis_Aciklama>3D Secure Forex Payment</Siparis_Aciklama>
+      <Siparis_Aciklama><![CDATA[3D Secure Forex Payment]]></Siparis_Aciklama>
       <Taksit>{taksit}</Taksit>
       <Islem_Tutar>{islem_tutar}</Islem_Tutar>
       <Toplam_Tutar>{toplam_tutar}</Toplam_Tutar>
       <Islem_Hash>{islem_hash}</Islem_Hash>
       <Islem_Guvenlik_Tip>3D</Islem_Guvenlik_Tip>
-      <IPAdr>{request.environ.get('REMOTE_ADDR', '127.0.0.1')}</IPAdr>
-      <Ref_URL>{request.url_root.rstrip('/')}</Ref_URL>
+      <IPAdr>127.0.0.1</IPAdr>
+      <Ref_URL>http://localhost:5000</Ref_URL>
       <Data1>forex</Data1>
       <Data2>3dsecure</Data2>
       <Data3>usd</Data3>
@@ -1282,20 +1149,22 @@ def odeme_doviz():
   </soap:Body>
 </soap:Envelope>"""
 
-    # SOAP headers
+    # Headers
     headers = {
         "Content-Type": "text/xml; charset=utf-8",
         "SOAPAction": "https://turkpos.com.tr/TP_Islem_Odeme_WD",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "text/xml, application/soap+xml",
-        "Cache-Control": "no-cache"
+        "User-Agent": "Mozilla/5.0 (compatible; TurkPOS-Client/1.0)"
     }
 
-    # Test/Prod URL
-    url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"
+    # 🚨 URL düzeltmesi - Test ortamı için doğru URL
+    url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_test.asmx"  # TEST için
 
-    print(f"🔗 SOAP isteği gönderiliyor: {url}")
+    print(f"🔗 SOAP URL: {url}")
     print(f"📤 XML uzunluğu: {len(xml_data)} byte")
+
+    # XML'i logla (hassas bilgileri gizle)
+    masked_xml = xml_data.replace(CLIENT_PASSWORD, "****").replace(kk_no, f"{kk_no[:6]}****{kk_no[-4:]}")
+    print(f"📤 SOAP XML:\n{masked_xml}")
 
     try:
         # SOAP isteği gönder
@@ -1303,25 +1172,30 @@ def odeme_doviz():
             url,
             data=xml_data.encode("utf-8"),
             headers=headers,
-            timeout=30,
+            timeout=60,  # Timeout arttır
             verify=True
         )
 
         print(f"📥 Response Status: {response.status_code}")
-        print(f"📥 Response uzunluğu: {len(response.text)} byte")
+        print(f"📥 Response Headers: {dict(response.headers)}")
+        print(f"📥 Response Length: {len(response.text)} chars")
 
         if response.status_code != 200:
+            print(f"❌ HTTP {response.status_code}: {response.text[:500]}")
             return render_template("error.html",
                                    sonuc="0",
                                    sonuc_str=f"HTTP Hatası: {response.status_code}",
                                    hata_tipi="HTTP Hatası")
+
+        # Response'u logla
+        print(f"📥 SOAP Response:\n{response.text[:1000]}...")
 
         # XML response'u parse et
         try:
             root = ET.fromstring(response.text)
         except ET.ParseError as e:
             print(f"❌ XML Parse hatası: {e}")
-            print(f"Response içeriği: {response.text[:500]}")
+            print(f"Response tam içeriği: {response.text}")
             return render_template("error.html",
                                    sonuc="0",
                                    sonuc_str="XML yanıtı parse edilemedi",
@@ -1329,13 +1203,19 @@ def odeme_doviz():
 
         ns = {
             'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-            'ns': 'https://turkpos.com.tr/'
+            'ns': 'https://turkpos.com.tr/',
+            '': 'https://turkpos.com.tr/'  # Boş namespace için
         }
 
-        # SOAP result'ı bul
-        result = root.find(".//ns:TP_Islem_Odeme_WDResult", ns)
+        # Ve element bulma kısmını şöyle değiştirin:
+        result = root.find(".//{https://turkpos.com.tr/}TP_Islem_Odeme_WDResult") or \
+                 root.find(".//TP_Islem_Odeme_WDResult")
+
         if result is None:
             print("❌ SOAP result elementi bulunamadı!")
+            # Tüm elementleri listele
+            for elem in root.iter():
+                print(f"Element: {elem.tag} = {elem.text}")
             return render_template("error.html",
                                    sonuc="0",
                                    sonuc_str="SOAP yanıtı geçersiz format",
@@ -1357,14 +1237,16 @@ def odeme_doviz():
         islem_id = result.find("ns:Islem_ID", ns)
         islem_id = islem_id.text if islem_id is not None else ""
 
-        # Debug bilgileri
-        print(f"\n=== YANIT BİLGİLERİ ===")
-        print(f"Sonuç: {sonuc}")
-        print(f"Sonuç Açıklama: {sonuc_str}")
-        print(f"İşlem ID: {islem_id}")
-        print(f"UCD_HTML var mı: {bool(ucd_html and ucd_html.strip())}")
-        print(f"UCD_URL var mı: {bool(ucd_url and ucd_url.strip())}")
-        print(f"====================\n")
+        # 🔍 Detaylı sonuç analizi
+        print("\n" + "=" * 50)
+        print("🔍 SOAP RESPONSE ANALİZİ")
+        print("=" * 50)
+        print(f"Sonuc: '{sonuc}'")
+        print(f"Sonuc_Str: '{sonuc_str}'")
+        print(f"UCD_HTML: {'VAR' if ucd_html else 'YOK'} ({len(ucd_html)} char)")
+        print(f"UCD_URL: {'VAR' if ucd_url else 'YOK'}")
+        print(f"Islem_ID: '{islem_id}'")
+        print("=" * 50 + "\n")
 
         # Sonuç kontrolü
         try:
@@ -1375,7 +1257,6 @@ def odeme_doviz():
         if sonuc_int > 0:
             print("✅ 3D güvenlik işlemi başlatılıyor")
 
-            # 3D HTML içeriği varsa
             if ucd_html and ucd_html.strip():
                 print("✅ UCD_HTML mevcut, 3D sayfası render ediliyor")
                 return render_template("doviz_3d.html",
@@ -1383,7 +1264,6 @@ def odeme_doviz():
                                        islem_id=islem_id,
                                        sonuc_str=sonuc_str)
 
-            # 3D URL varsa
             elif ucd_url and ucd_url.strip():
                 print("✅ UCD_URL mevcut, yönlendirme sayfası gösteriliyor")
                 return render_template("doviz_3d_redirect.html",
@@ -1400,16 +1280,19 @@ def odeme_doviz():
         else:
             print(f"❌ İşlem başarısız: {sonuc_str}")
 
-            # Özel hata mesajları
-            hata_mesajlari = {
-                "3D_RED": "3D güvenlik doğrulama başarısız. Lütfen farklı bir kart deneyin.",
+            # Hata analizi
+            hata_tipleri = {
+                "3D_RED": "3D güvenlik doğrulama reddedildi",
                 "INVALID_CARD": "Geçersiz kart numarası",
-                "EXPIRED_CARD": "Kartınızın süresi dolmuş",
+                "EXPIRED_CARD": "Kartın süresi dolmuş",
                 "INSUFFICIENT_FUNDS": "Yetersiz bakiye",
-                "DECLINED": "İşlem bankanız tarafından reddedildi"
+                "DECLINED": "İşlem reddedildi",
+                "INVALID_MERCHANT": "Geçersiz üye işyeri bilgileri",
+                "INVALID_AMOUNT": "Geçersiz tutar",
+                "HASH_ERROR": "Hash doğrulama hatası"
             }
 
-            user_message = hata_mesajlari.get(sonuc_str, sonuc_str)
+            user_message = hata_tipleri.get(sonuc_str, sonuc_str)
 
             return render_template("error.html",
                                    sonuc=sonuc,
@@ -1433,214 +1316,112 @@ def odeme_doviz():
 
     except Exception as e:
         print(f"❌ Beklenmeyen hata: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return render_template("error.html",
                                sonuc="0",
                                sonuc_str="Beklenmeyen bir hata oluştu",
                                hata_tipi="Sistem Hatası")
-
-
 @app.route("/doviz-sonuc", methods=["GET", "POST"])
 def sonuc_doviz():
-    """3D işlemi sonuç sayfası - Finalize'a yönlendirme yapar"""
+    """SOAP XML tabanlı TurkPOS sonuç sayfası"""
     try:
-        # POST ve GET parametrelerini al
-        params = {}
-        if request.method == "POST":
-            params.update(request.form.to_dict())
-        params.update(request.args.to_dict())
 
-        sonuc = params.get("Sonuc", "").strip()
-        sonuc_str = params.get("Sonuc_Str", "").strip()
-        islem_id = params.get("Islem_ID", "").strip()
-        ucd_url = params.get("UCD_URL", "").strip()
-        siparis_id = params.get("Siparis_ID", "").strip()
+        # TurkPOS XML parametrelerini parse et
+        turkpos_sonuc = request.form.get("TURKPOS_RETVAL_Sonuc", "").strip()
+        turkpos_sonuc_str = request.form.get("TURKPOS_RETVAL_Sonuc_Str", "").strip()
+        turkpos_guid = request.form.get("TURKPOS_RETVAL_GUID", "").strip()
+        turkpos_islem_tarih = request.form.get("TURKPOS_RETVAL_Islem_Tarih", "").strip()
+        turkpos_dekont_id = request.form.get("TURKPOS_RETVAL_Dekont_ID", "").strip()
+        turkpos_tahsilat_tutari = request.form.get("TURKPOS_RETVAL_Tahsilat_Tutari", "").strip()
+        turkpos_odeme_tutari = request.form.get("TURKPOS_RETVAL_Odeme_Tutari", "").strip()
+        turkpos_siparis_id = request.form.get("TURKPOS_RETVAL_Siparis_ID", "").strip()
+        turkpos_islem_id = request.form.get("TURKPOS_RETVAL_Islem_ID", "").strip()
+        turkpos_ext_data = request.form.get("TURKPOS_RETVAL_Ext_Data", "").strip()
+        turkpos_banka_kod = request.form.get("TURKPOS_RETVAL_Banka_Sonuc_Kod", "").strip()
+        turkpos_kk_no = request.form.get("TURKPOS_RETVAL_KK_No", "").strip()
 
-        print(f"\n=== DOVIZ SONUC ===")
-        print(f"Sonuc: {sonuc}")
-        print(f"Sonuc_Str: {sonuc_str}")
-        print(f"Islem_ID: {islem_id}")
-        print(f"UCD_URL: {ucd_url}")
-        print(f"Siparis_ID: {siparis_id}")
-        print(f"================\n")
+        # Eski parametreler (fallback için)
+        sonuc = request.form.get("Sonuc", turkpos_sonuc).strip()
+        sonuc_str = request.form.get("Sonuc_Str", turkpos_sonuc_str).strip()
+        islem_id = request.form.get("Islem_ID", turkpos_islem_id).strip()
+        siparis_id = request.form.get("Siparis_ID", turkpos_siparis_id).strip()
+        ucd_url = request.form.get("UCD_URL", "").strip()
 
-        # 3D başarılıysa finalize işlemine yönlendir
-        if sonuc == "1":
-            print("✅ 3D başarılı, finalize'a yönlendiriliyor...")
-            return redirect(url_for('finalize_doviz',
-                                  Sonuc=sonuc,
-                                  Sonuc_Str=sonuc_str,
-                                  Islem_ID=islem_id,
-                                  UCD_URL=ucd_url,
-                                  Siparis_ID=siparis_id))
-        else:
-            # 3D başarısızsa hata sayfasını göster
-            print("❌ 3D işlemi başarısız!")
-            return render_template("doviz_sonuc.html",
-                                 islem_id=islem_id,
-                                 sonuc_str=sonuc_str,
-                                 sonuc=sonuc,
-                                 siparis_id=siparis_id,
-                                 success=False,
-                                 hata_mesaj="3D doğrulama başarısız oldu.")
+        print(f"\n=== TURKPOS DOVIZ SONUC ===")
+        print(f"TURKPOS_Sonuc: {turkpos_sonuc}")
+        print(f"TURKPOS_Sonuc_Str: {turkpos_sonuc_str}")
+        print(f"TURKPOS_GUID: {turkpos_guid}")
+        print(f"TURKPOS_Islem_Tarih: {turkpos_islem_tarih}")
+        print(f"TURKPOS_Dekont_ID: {turkpos_dekont_id}")
+        print(f"TURKPOS_Tahsilat_Tutari: {turkpos_tahsilat_tutari}")
+        print(f"TURKPOS_Odeme_Tutari: {turkpos_odeme_tutari}")
+        print(f"TURKPOS_Siparis_ID: {turkpos_siparis_id}")
+        print(f"TURKPOS_Islem_ID: {turkpos_islem_id}")
+        print(f"TURKPOS_Ext_Data: {turkpos_ext_data}")
+        print(f"TURKPOS_Banka_Kod: {turkpos_banka_kod}")
+        print(f"TURKPOS_KK_No: {turkpos_kk_no}")
+        print(f"Legacy - Sonuc: {sonuc}")
+        print(f"Legacy - UCD_URL: {ucd_url}")
+        print(f"=======================\n")
 
-    except Exception as e:
-        print(f"❌ Sonuc sayfası hatası: {str(e)}")
-        return render_template("error.html",
-                               sonuc="0",
-                               sonuc_str=f"Sonuç sayfası hatası: {str(e)}",
-                               hata_tipi="Sonuç Hatası")
+        # Sonuç kontrolü (TurkPOS öncelikli)
+        final_sonuc = turkpos_sonuc if turkpos_sonuc else sonuc
+        final_sonuc_str = turkpos_sonuc_str if turkpos_sonuc_str else sonuc_str
+        final_islem_id = turkpos_islem_id if turkpos_islem_id else islem_id
+        final_siparis_id = turkpos_siparis_id if turkpos_siparis_id else siparis_id
 
-
-@app.route("/doviz-finalize", methods=["GET", "POST"])
-def finalize_doviz():
-    """3D işlem sonrası finalize işlemi"""
-    try:
-        # POST ve GET parametrelerini al
-        params = {}
-        if request.method == "POST":
-            params.update(request.form.to_dict())
-        params.update(request.args.to_dict())
-
-        # Parametreleri al
-        sonuc = params.get("Sonuc", "").strip()
-        sonuc_str = params.get("Sonuc_Str", "").strip()
-        islem_id = params.get("Islem_ID", "").strip()
-        ucd_url = params.get("UCD_URL", "").strip()
-        siparis_id = params.get("Siparis_ID", "").strip()
-        banka_sonuc_kod = params.get("Banka_Sonuc_Kod", "").strip()
-
-        print(f"\n=== FINALIZE İŞLEMİ ===")
-        print(f"Method: {request.method}")
-        print(f"Sonuc: '{sonuc}'")
-        print(f"Sonuc_Str: '{sonuc_str}'")
-        print(f"Islem_ID: '{islem_id}'")
-        print(f"UCD_URL: '{ucd_url}'")
-        print(f"Siparis_ID: '{siparis_id}'")
-        print(f"Banka_Sonuc_Kod: '{banka_sonuc_kod}'")
-        print(f"Tüm parametreler: {params}")
-        print(f"========================\n")
-
-        # Eğer 3D başarılıysa ve UCD_URL varsa, finalize işlemi yap
-        if sonuc == "1" and ucd_url:
-            print("✅ 3D başarılı, finalize işlemi yapılıyor...")
-
-            # PARAM finalize parametreleri hazırla
-            finalize_data = {
-                "CLIENT_CODE": "YOUR_CLIENT_CODE",  # PARAM'dan aldığınız kod
-                "CLIENT_USERNAME": "YOUR_USERNAME",
-                "CLIENT_PASSWORD": "YOUR_PASSWORD",
-                "GUID": "YOUR_GUID",
-                "UCD_URL": ucd_url,  # Bankadan gelen UCD_URL
-                "Islem_ID": islem_id,  # İşlem ID
-                "Siparis_ID": siparis_id if siparis_id else islem_id,
-                "TURKPOS_RETVAL_Addr": url_for('finalize_callback', _external=True),  # Finalize sonuç URL'i
-                "Lang": "TR"
-            }
-
-            # PARAM finalize servisine istek gönder
-            finalize_url = "https://testposws.param.com.tr/turkpos.ws/service_turkpos_prod.asmx"  # Test URL - Production için değiştirin
-
-            print(f"🔄 Finalize isteği gönderiliyor: {finalize_url}")
-
-
-            # Form olarak finalize sayfasına yönlendir
-            return render_template("success.html",
-                                   action_url=finalize_url)
-
-        elif sonuc == "0":
-            print("❌ 3D işlemi başarısız!")
-            return render_template("doviz_sonuc.html",
-                                   islem_id=islem_id,
-                                   sonuc_str=sonuc_str,
-                                   sonuc=sonuc,
-                                   siparis_id=siparis_id,
-                                   success=False,
-                                   hata_mesaj="3D doğrulama başarısız oldu.")
-
-        else:
-            print(f"⚠️ Bilinmeyen sonuç: {sonuc}")
-            return render_template("doviz_sonuc.html",
-                                   islem_id=islem_id,
-                                   sonuc_str=sonuc_str,
-                                   sonuc=sonuc,
-                                   siparis_id=siparis_id,
-                                   success=False,
-                                   hata_mesaj="Bilinmeyen durum.")
-
-    except Exception as e:
-        print(f"❌ Finalize hatası: {str(e)}")
-        import traceback
-        traceback.print_exc()
-
-        return render_template("error.html",
-                               sonuc="0",
-                               sonuc_str=f"Finalize hatası: {str(e)}",
-                               hata_tipi="Finalize Hatası"), 500
-
-
-@app.route("/doviz-finalize-callback", methods=["GET", "POST"])
-def finalize_callback():
-    """Finalize işlemi sonuç callback'i"""
-    try:
-        # POST ve GET parametrelerini al
-        params = {}
-        if request.method == "POST":
-            params.update(request.form.to_dict())
-        params.update(request.args.to_dict())
-
-        # Final sonuç parametreleri
-        final_sonuc = params.get("Sonuc", "").strip()
-        final_sonuc_str = params.get("Sonuc_Str", "").strip()
-        islem_id = params.get("Islem_ID", "").strip()
-        siparis_id = params.get("Siparis_ID", "").strip()
-        dekont_id = params.get("Dekont_ID", "").strip()
-        tutar = params.get("Tutar", "").strip()
-
-        print(f"\n=== FİNAL SONUÇ ===")
-        print(f"Final_Sonuc: '{final_sonuc}'")
-        print(f"Final_Sonuc_Str: '{final_sonuc_str}'")
-        print(f"Dekont_ID: '{dekont_id}'")
-        print(f"Tutar: '{tutar}'")
-        print(f"Tüm parametreler: {params}")
-        print(f"===================\n")
-
-        # Veritabanında işlemi güncelle
+        # Başarı kontrolü - TurkPOS'ta "1" başarı anlamına gelir
         if final_sonuc == "1":
-            # Başarılı ödeme
-            print("🎉 Ödeme başarıyla tamamlandı!")
+            print("✅ TurkPOS işlemi başarılı!")
 
-
-            # update_payment_status(siparis_id, "completed", dekont_id)
-
-            return render_template("success.html",
-                                   dekont_id=dekont_id,
-                                   tutar=tutar,
-                                   siparis_id=siparis_id,
-                                   islem_id=islem_id)
+            # Eğer finalize işlemi gerekiyorsa
+            if ucd_url:
+                print("🔄 Finalize işlemine yönlendiriliyor...")
+                return redirect(url_for('doviz_3d_redirect.html',
+                                        TURKPOS_RETVAL_Sonuc=turkpos_sonuc,
+                                        TURKPOS_RETVAL_Sonuc_Str=turkpos_sonuc_str,
+                                        TURKPOS_RETVAL_GUID=turkpos_guid,
+                                        TURKPOS_RETVAL_Islem_ID=turkpos_islem_id,
+                                        TURKPOS_RETVAL_Siparis_ID=turkpos_siparis_id,
+                                        TURKPOS_RETVAL_Dekont_ID=turkpos_dekont_id,
+                                        UCD_URL=ucd_url))
+            else:
+                # Direkt başarı sayfası
+                return render_template("doviz_sonuc.html",
+                                       turkpos_sonuc=turkpos_sonuc,
+                                       turkpos_sonuc_str=turkpos_sonuc_str,
+                                       turkpos_guid=turkpos_guid,
+                                       turkpos_islem_tarih=turkpos_islem_tarih,
+                                       turkpos_dekont_id=turkpos_dekont_id,
+                                       turkpos_tahsilat_tutari=turkpos_tahsilat_tutari,
+                                       turkpos_odeme_tutari=turkpos_odeme_tutari,
+                                       turkpos_kk_no=turkpos_kk_no,
+                                       islem_id=final_islem_id,
+                                       siparis_id=final_siparis_id,
+                                       success=True)
         else:
-            # Başarısız ödeme
-            print("❌ Final ödeme başarısız!")
-
-
-            # update_payment_status(siparis_id, "failed", None)
-
-            return render_template("error.html",
-                                   hata_mesaj=final_sonuc_str,
-                                   siparis_id=siparis_id,
-                                   islem_id=islem_id)
+            # İşlem başarısız
+            print(f"❌ TurkPOS işlemi başarısız! Kod: {turkpos_banka_kod}")
+            return render_template("doviz_sonuc.html",
+                                   turkpos_sonuc=turkpos_sonuc,
+                                   turkpos_sonuc_str=turkpos_sonuc_str,
+                                   turkpos_banka_kod=turkpos_banka_kod,
+                                   islem_id=final_islem_id,
+                                   siparis_id=final_siparis_id,
+                                   success=False,
+                                   hata_mesaj=f"İşlem başarısız: {final_sonuc_str}")
 
     except Exception as e:
-        print(f"❌ Final callback hatası: {str(e)}")
-        import traceback
-        traceback.print_exc()
-
+        print(f"❌ TurkPOS sonuç sayfası hatası: {str(e)}")
         return render_template("error.html",
                                sonuc="0",
-                               sonuc_str=f"Final callback hatası: {str(e)}",
-                               hata_tipi="Callback Hatası"), 500
+                               sonuc_str=f"TurkPOS sonuç hatası: {str(e)}",
+                               hata_tipi="TurkPOS Sonuç Hatası")
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 
 
